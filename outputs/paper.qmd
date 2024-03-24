@@ -1,10 +1,16 @@
 ---
-title: "Untitled"
-author: "Boxuan Yi"
+title: ""
 format: pdf
+date: "24 March 2024"
+date-format: "D MMMM YYYY"
+number-sections: true
+thanks: "Code and data in this analysis is available at: https://github.com/Elaineyi1/Prenatal_Mental_Health"
+bibliography: references.bib
+toc: true
 ---
 
 ```{r}
+#| include: false
 library(arrow)
 library(readr)
 library(here)
@@ -18,14 +24,15 @@ library(knitr)
 ```
 
 ```{r}
+#| include: false
 # clean_data <- read_parquet(file = "inputs/data/cleaned_mental_health.parquet")
 clean_data <- read_csv(
     file = here("inputs/data/cleaned_mental_health.csv"),
-    show_col_types = FALSE
-  )
+    show_col_types = FALSE)
 ```
 
 ```{r}
+#| include: false
 age_levels <- c("Under 27", "27 to 34", "35 to 39", "40 and above")
 income_levels <- c("Less than $20,000", "$20,000 - $39,999", "$40,000 - $69,999", 
                    "$70,000 - $99,999", "$100,000 - $124,999", "$125,000 - $149,999",
@@ -37,6 +44,11 @@ clean_data$month <- factor(clean_data$month, levels = month_levels)
 ```
 
 ```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: fig-income_age
+#| fig-cap: The Distribution of Age Groups and Household Income for Pregnant Participants
 # Pastel1
 clean_data |>
   ggplot(mapping = aes(x = household_income, fill = age_group)) +
@@ -47,6 +59,11 @@ clean_data |>
   labs(x = "Household Income in 2019", y = "Number of Observations", fill = "Age Group") 
 ```
 ```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-income
+#| tbl-cap: Levels of Depression and Anxiety Among Different Income Groups
 clean_data |> group_by(household_income) |> 
   summarise(average_depression = mean(EPDS), average_anxiety = mean(PROMIS)) |> 
   rename("Household Income in 2019" = household_income, 
@@ -56,15 +73,101 @@ clean_data |> group_by(household_income) |>
 ```
 
 ```{r}
-clean_data |> group_by(age_group) |> 
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-age
+#| tbl-cap: Levels of Depression and Anxiety Among Different Age Groups
+clean_data |> group_by(age_group, language) |> 
   summarise(average_depression = mean(EPDS), average_anxiety = mean(PROMIS)) |> 
   rename("Age Group" = age_group, 
+         "Survey Language" = language,
          "Average Level of Depression" = average_depression, 
          "Average Level of Anxiety" = average_anxiety) |>
   kable()
 ```
 
 ```{r}
+#| label: fig-month
+#| fig-cap: Distribution of Levels of Depression and Anxiety by Month
+#| echo: false
+#| warning: false
+#| message: false
+#| layout-ncol: 2
+#| fig-subcap: ["Distribution of Edinburgh Postnatal Depression Scale Scores by Month", "Distribution of Promis Anxiety Scores by Months"]
+clean_data |>
+  ggplot(aes(x = month, y = EPDS)) +
+  geom_boxplot() +
+  theme_classic()
+
+clean_data |>
+  ggplot(aes(x = month, y = PROMIS)) +
+  geom_boxplot() +
+  theme_classic()
+```
+
+# Model
+```{r}
+#| include: false
+depression_model <- readRDS(file = here::here("model/depression.rds"))
+```
+
+```{r}
+#| include: false
+anxiety_model <- readRDS(file = here::here("model/anxiety.rds"))
+```
+
+# Results
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-depression_model
+#| tbl-cap: Estimating Prenatal Depression given Age, Household Income, Month of Delivery and Choice of Language
+modelsummary(
+  list(
+    "Level of Depression" = depression_model))
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: tbl-anxiety_model
+#| tbl-cap: Estimating Prenatal Anxiety given Age Group, Household Income, Month of Delivery and Choice of Language.
+modelsummary(
+  list(
+    "Level of Anxiety" = anxiety_model))
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: fig-depression_interval
+#| fig-cap: The Coefficients and Confidence Interval in the Depression Model
+modelplot(depression_model, conf_level = 0.95) +
+  labs(x = "95% Level of Depression Interval")
+```
+
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: fig-anxiety_interval
+#| fig-cap: The Coefficients and Confidence Interval in the Anxiety Model
+modelplot(anxiety_model, conf_level = 0.95) +
+  labs(x = "95% Level of Anxiety Interval")
+```
+
+```{r}
+#| label: fig-danger
+#| fig-cap: Association between Perceived Level of Danger and Prenatal Mental Health
+#| echo: false
+#| warning: false
+#| message: false
+#| layout-ncol: 2
+#| fig-subcap: ["Relationship between Perceived Danger to Self and Depression", "Relationship between Perceived Danger to the Unborn and Depression", "Relationship between Perceived Danger to Self and Anxiety", "Relationship between Perceived Danger to the Unborn and Anxiety"]
 clean_data |>
   ggplot(aes(x = threaten_life, y = EPDS, color = language)) +
   geom_smooth(method = "lm") +
@@ -90,52 +193,15 @@ clean_data |>
   labs(x="Perceived Danger to Unborn Baby's Life", y = "Level of Prenatal Anxiety") + ylim(0,1)
 ```
 
-```{r}
-clean_data |>
-  ggplot(aes(x = month, y = EPDS)) +
-  geom_boxplot() +
-  theme_classic()
-
-clean_data |>
-  ggplot(aes(x = month, y = PROMIS)) +
-  geom_boxplot() +
-  theme_classic()
-```
-
-# Model
-```{r}
-depression_model <- readRDS(file = here::here("model/depression.rds"))
-```
-
-```{r}
-anxiety_model <- readRDS(file = here::here("model/anxiety.rds"))
-```
-
-# Results
-```{r}
-modelsummary(
-  list(
-    "Level of Depression" = depression_model))
-```
-
-```{r}
-modelsummary(
-  list(
-    "Level of Anxiety" = anxiety_model))
-```
-
-```{r}
-modelplot(depression_model, conf_level = 0.95) +
-  labs(x = "95% Level of Depression Interval")
-```
-
-```{r}
-modelplot(anxiety_model, conf_level = 0.95) +
-  labs(x = "95% Level of Anxiety Interval")
-```
-
 # Discussions
 ```{r}
+#| label: fig-weight_delivery
+#| fig-cap: Distribution of Birth Weight and Prenatal Mental Health by Delivery Mode
+#| echo: false
+#| warning: false
+#| message: false
+#| layout-ncol: 2
+#| fig-subcap: ["Distribution of Birth Weight and Depression by Delivery Mode", "Distribution of Birth Weight and Anxiety by Delivery Mode"]
 clean_data |>
   ggplot(aes(x = EPDS, y = birth_weight, color = delivery_mode)) +
   geom_smooth(method = "lm")+
@@ -150,6 +216,11 @@ clean_data |>
 
 # Appendix
 ```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: fig-danger_baby
+#| fig-cap: Distribution of the Preceived Danger to Baby and Preceived Potential Harm to Baby
 clean_data |>
   ggplot(aes(x = threaten_baby_danger, y = threaten_baby_harm)) +
   geom_jitter(color='darkgray', alpha=0.4) +
@@ -158,6 +229,11 @@ clean_data |>
 ```
 
 ```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: fig-language_income
+#| fig-cap: Income Group Distribution Based on the Choice of Survey Language
 clean_data |>
   ggplot(aes(x = household_income, fill = language)) +
   stat_count(position = "dodge") +
@@ -165,7 +241,6 @@ clean_data |>
   coord_flip() +
   scale_fill_brewer(palette = "Set1") +
   theme(legend.position = "bottom")
-
 ```
 
 
