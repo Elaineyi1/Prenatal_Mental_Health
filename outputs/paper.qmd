@@ -1,0 +1,171 @@
+---
+title: "Untitled"
+author: "Boxuan Yi"
+format: pdf
+---
+
+```{r}
+library(arrow)
+library(readr)
+library(here)
+library(ggplot2)
+library(janitor)
+library(rstanarm)
+library(dplyr)
+library(modelsummary)
+library(broom)
+library(knitr)
+```
+
+```{r}
+# clean_data <- read_parquet(file = "inputs/data/cleaned_mental_health.parquet")
+clean_data <- read_csv(
+    file = here("inputs/data/cleaned_mental_health.csv"),
+    show_col_types = FALSE
+  )
+```
+
+```{r}
+age_levels <- c("Under 27", "27 to 34", "35 to 39", "40 and above")
+income_levels <- c("Less than $20,000", "$20,000 - $39,999", "$40,000 - $69,999", 
+                   "$70,000 - $99,999", "$100,000 - $124,999", "$125,000 - $149,999",
+                   "$150,000 - $174,999", "$175,000 - $199,999", "$200,000+")
+month_levels <- c("Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+clean_data$age_group <- factor(clean_data$age_group, levels = age_levels)
+clean_data$household_income <- factor(clean_data$household_income, levels = income_levels)
+clean_data$month <- factor(clean_data$month, levels = month_levels)
+```
+
+```{r}
+# Pastel1
+clean_data |>
+  ggplot(mapping = aes(x = household_income, fill = age_group)) +
+  geom_bar(position = "dodge2") + 
+  theme(legend.position = "bottom") +
+  scale_fill_brewer(palette = "Set2") +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  labs(x = "Household Income in 2019", y = "Number of Observations", fill = "Age Group") 
+```
+```{r}
+clean_data |> group_by(household_income) |> 
+  summarise(average_depression = mean(EPDS), average_anxiety = mean(PROMIS)) |> 
+  rename("Household Income in 2019" = household_income, 
+         "Average Level of Depression" = average_depression, 
+         "Average Level of Anxiety" = average_anxiety) |>
+  kable()
+```
+
+```{r}
+clean_data |> group_by(age_group) |> 
+  summarise(average_depression = mean(EPDS), average_anxiety = mean(PROMIS)) |> 
+  rename("Age Group" = age_group, 
+         "Average Level of Depression" = average_depression, 
+         "Average Level of Anxiety" = average_anxiety) |>
+  kable()
+```
+
+```{r}
+clean_data |>
+  ggplot(aes(x = threaten_life, y = EPDS, color = language)) +
+  geom_smooth(method = "lm") +
+  theme_classic() + 
+  labs(x="Perceived Level of Danger", y = "Level of Prenatal Depression") + ylim(0,1)
+
+clean_data |>
+  ggplot(aes(x = threaten_baby_danger, y = EPDS, color = language)) +
+  geom_smooth(method = "lm") +
+  theme_classic() +
+  labs(x="Perceived Danger to Unborn Baby's Life", y = "Level of Prenatal Depression") + ylim(0,1)
+
+clean_data |>
+  ggplot(aes(x = threaten_life, y = PROMIS, color = language)) +
+  geom_smooth(method = "lm") +
+  theme_classic() +
+  labs(x="Perceived Level of Danger", y = "Level of Prenatal Anxiety") + ylim(0,1)
+
+clean_data |>
+  ggplot(aes(x = threaten_baby_danger, y = PROMIS, color = language)) +
+  geom_smooth(method = "lm") +
+  theme_classic() +
+  labs(x="Perceived Danger to Unborn Baby's Life", y = "Level of Prenatal Anxiety") + ylim(0,1)
+```
+
+```{r}
+clean_data |>
+  ggplot(aes(x = month, y = EPDS)) +
+  geom_boxplot() +
+  theme_classic()
+
+clean_data |>
+  ggplot(aes(x = month, y = PROMIS)) +
+  geom_boxplot() +
+  theme_classic()
+```
+
+# Model
+```{r}
+depression_model <- readRDS(file = here::here("model/depression.rds"))
+```
+
+```{r}
+anxiety_model <- readRDS(file = here::here("model/anxiety.rds"))
+```
+
+# Results
+```{r}
+modelsummary(
+  list(
+    "Level of Depression" = depression_model))
+```
+
+```{r}
+modelsummary(
+  list(
+    "Level of Anxiety" = anxiety_model))
+```
+
+```{r}
+modelplot(depression_model, conf_level = 0.95) +
+  labs(x = "95% Level of Depression Interval")
+```
+
+```{r}
+modelplot(anxiety_model, conf_level = 0.95) +
+  labs(x = "95% Level of Anxiety Interval")
+```
+
+# Discussions
+```{r}
+clean_data |>
+  ggplot(aes(x = EPDS, y = birth_weight, color = delivery_mode)) +
+  geom_smooth(method = "lm")+
+  theme_minimal() + labs(x = "The Level of Prenatal Depression", y = "Birth Weight (grams)")
+
+clean_data |>
+  ggplot(aes(x = PROMIS, y = birth_weight, color = delivery_mode)) +
+  geom_smooth(method = "lm")+
+  theme_minimal() +
+  labs(x = "The Level of Prenatal Anxiety", y = "Birth Weight (grams)")
+```
+
+# Appendix
+```{r}
+clean_data |>
+  ggplot(aes(x = threaten_baby_danger, y = threaten_baby_harm)) +
+  geom_jitter(color='darkgray', alpha=0.4) +
+  geom_smooth() +
+  theme_classic() 
+```
+
+```{r}
+clean_data |>
+  ggplot(aes(x = household_income, fill = language)) +
+  stat_count(position = "dodge") +
+  theme_minimal() +
+  coord_flip() +
+  scale_fill_brewer(palette = "Set1") +
+  theme(legend.position = "bottom")
+
+```
+
+
