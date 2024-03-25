@@ -11,12 +11,14 @@ library(arrow)
 
 raw_data <- clean_names(raw_data) 
 raw_data <- raw_data |> 
-  select(maternal_age, household_income, edinburgh_postnatal_depression_scale, promis_anxiety, delivery_date_converted_to_month_and_year, birth_length, birth_weight, 	
+  select(maternal_age, household_income, edinburgh_postnatal_depression_scale, promis_anxiety, 
+         delivery_date_converted_to_month_and_year, birth_length, birth_weight, maternal_education, 
          delivery_mode, language, threaten_life, threaten_baby_danger, threaten_baby_harm)
 
 raw_data_complete <- raw_data[complete.cases(raw_data), ]
 
-raw_data_complete <- raw_data_complete |> filter(household_income != "") |>
+raw_data_complete <- raw_data_complete |> filter(household_income != "") |> 
+  filter(maternal_education != "") |>
   mutate(month = substr(delivery_date_converted_to_month_and_year, 1, 3),
          year = substr(delivery_date_converted_to_month_and_year, 4, 7),
          age_group = case_when(
@@ -41,7 +43,9 @@ raw_data_complete <- raw_data_complete |> filter(household_income != "") |>
          threaten_baby_harm = threaten_baby_harm/100)
 
 clean_data <- raw_data_complete |>  filter(year == '2020') |>
-  select(age_group, maternal_age, income, birth_weight, delivery_mode, language, threaten_life, threaten_baby_danger, threaten_baby_harm, month, EPDS, PROMIS) |>
+  select(age_group, maternal_age, income, maternal_education, birth_weight, birth_length,
+         delivery_mode, language, threaten_life, threaten_baby_danger, threaten_baby_harm, 
+         month, EPDS, PROMIS) |>
   rename(household_income = income)
 
 write.csv(

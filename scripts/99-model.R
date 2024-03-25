@@ -16,7 +16,7 @@ clean_data <- read_csv(
 # Depression Model
 depression_model <-
   stan_glm(
-    EPDS ~ age_group + household_income + language + month,
+    EPDS ~ age_group + household_income + language + maternal_education,
     data = clean_data,
     family = binomial(link = "logit"),
     prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
@@ -33,7 +33,7 @@ saveRDS(
 # Anxiety Model
 anxiety_model <-
   stan_glm(
-    PROMIS ~ age_group + household_income + language + month,
+    PROMIS ~ age_group + household_income + language + maternal_education,
     data = clean_data,
     family = binomial(link = "logit"),
     prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
@@ -46,3 +46,5 @@ saveRDS(
   anxiety_model,
   file = "model/anxiety.rds"
 )
+
+
