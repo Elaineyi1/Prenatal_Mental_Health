@@ -187,7 +187,7 @@ anxiety_model <- readRDS(file = here::here("model/anxiety.rds"))
 #| echo: false
 #| warning: false
 #| label: tbl-depression_model
-#| tbl-cap: Estimating Prenatal Depression given Age, Household Income, Month of Delivery and Choice of Language
+#| tbl-cap: Estimating Prenatal Depression given Age, Household Income, Education Level and Choice of Language
 modelsummary(
   list(
     "Level of Depression" = depression_model))
@@ -198,7 +198,7 @@ modelsummary(
 #| echo: false
 #| warning: false
 #| label: tbl-anxiety_model
-#| tbl-cap: Estimating Prenatal Anxiety given Age Group, Household Income, Month of Delivery and Choice of Language.
+#| tbl-cap: Estimating Prenatal Anxiety given Age Group, Household Income, Education Level and Choice of Language.
 modelsummary(
   list(
     "Level of Anxiety" = anxiety_model))
@@ -211,7 +211,7 @@ modelsummary(
 #| label: fig-depression_interval
 #| fig-cap: The Coefficients and Confidence Interval in the Depression Model
 modelplot(depression_model, conf_level = 0.95, color = 'royalblue3') +
-  labs(x = "95% Level of Depression Interval")
+  labs(x = "Estimating Depression and 95% Confidence Interval")
 ```
 
 ```{r}
@@ -221,13 +221,13 @@ modelplot(depression_model, conf_level = 0.95, color = 'royalblue3') +
 #| label: fig-anxiety_interval
 #| fig-cap: The Coefficients and Confidence Interval in the Anxiety Model
 modelplot(anxiety_model, conf_level = 0.95, color = 'indianred3') +
-  labs(x = "95% Level of Anxiety Interval")
+  labs(x = "Estimating Anxiety and 95% Confidence Interval")
 ```
 
 # Discussions {#sec-discussions}
 
 ```{r}
-#| label: fig-weight_delivery
+#| label: fig-weight_length_delivery
 #| fig-cap: Distribution of Birth Weight and Length and Prenatal Mental Health by Delivery Mode
 #| echo: false
 #| warning: false
