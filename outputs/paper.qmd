@@ -1,6 +1,12 @@
 ---
-title: ""
-format: pdf
+title: "Analysis of Prenatal Depression and Anxiety during Covid-19"
+author: 
+  - Boxuan Yi
+format: 
+  pdf:
+    documentclass: article
+    geometry: margin = 1in
+    abstract: ""
 date: "24 March 2024"
 date-format: "D MMMM YYYY"
 number-sections: true
@@ -8,7 +14,7 @@ thanks: "Code and data in this analysis is available at: https://github.com/Elai
 bibliography: references.bib
 toc: true
 ---
-
+# Introduction
 ```{r}
 #| include: false
 library(arrow)
@@ -30,6 +36,8 @@ clean_data <- read_csv(
     file = here("inputs/data/cleaned_mental_health.csv"),
     show_col_types = FALSE)
 ```
+
+# Data
 
 ```{r}
 #| include: false
@@ -55,9 +63,10 @@ clean_data |>
   geom_bar(position = "dodge2") + 
   theme(legend.position = "bottom") +
   scale_fill_brewer(palette = "Set2") +
-  theme(axis.text.x = element_text(angle = 30, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 50, hjust = 1)) +
   labs(x = "Household Income in 2019", y = "Number of Observations", fill = "Age Group") 
 ```
+
 ```{r}
 #| message: false
 #| echo: false
@@ -97,13 +106,11 @@ clean_data |> group_by(age_group, language) |>
 #| fig-subcap: ["Distribution of Edinburgh Postnatal Depression Scale Scores by Month", "Distribution of Promis Anxiety Scores by Months"]
 clean_data |>
   ggplot(aes(x = month, y = EPDS)) +
-  geom_boxplot() +
-  theme_classic()
+  geom_boxplot() + ylim(0,1)
 
 clean_data |>
   ggplot(aes(x = month, y = PROMIS)) +
-  geom_boxplot() +
-  theme_classic()
+  geom_boxplot() + ylim(0,1)
 ```
 
 # Model
@@ -116,6 +123,7 @@ depression_model <- readRDS(file = here::here("model/depression.rds"))
 #| include: false
 anxiety_model <- readRDS(file = here::here("model/anxiety.rds"))
 ```
+
 
 # Results
 ```{r}
