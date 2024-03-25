@@ -42,7 +42,7 @@ raw_data_complete <- raw_data_complete |> filter(household_income != "") |>
          threaten_baby_danger = threaten_baby_danger/100,
          threaten_baby_harm = threaten_baby_harm/100)
 
-clean_data <- raw_data_complete |>  filter(year == '2020') |>
+clean_data <- raw_data_complete |>  filter(year == '2020') |> filter(month != 'Apr') |>
   select(age_group, maternal_age, income, maternal_education, birth_weight, birth_length,
          delivery_mode, language, threaten_life, threaten_baby_danger, threaten_baby_harm, 
          month, EPDS, PROMIS) |>
