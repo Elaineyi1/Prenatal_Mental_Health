@@ -37,7 +37,7 @@ raw_data_complete <- raw_data_complete |> filter(household_income != "") |>
            household_income == "$175,000- $199,999" ~ "$175,000 - $199,999",
            household_income == "Less than $20, 000" ~ "Less than $20,000"),
          EPDS = edinburgh_postnatal_depression_scale/30,
-         PROMIS = promis_anxiety/35,
+         PROMIS = (promis_anxiety-7)/28,
          threaten_life = threaten_life/100,
          threaten_baby_danger = threaten_baby_danger/100,
          threaten_baby_harm = threaten_baby_harm/100)
