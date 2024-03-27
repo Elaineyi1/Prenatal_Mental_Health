@@ -1,19 +1,21 @@
 ---
-title: "Analysis of Prenatal Depression and Anxiety during Covid-19"
+title: "Exploring Depression and Anxiety: Objective Hardship Exposure and Psychological Distress Among Pregnant Individuals"
+subtitle: "Analysis of Prenatal Mental Health During the Covid-19 Pandemic"
 author: 
   - Boxuan Yi
 format: 
   pdf:
     documentclass: article
     geometry: margin = 1in
-    abstract: ""
-date: "24 March 2024"
+    abstract: "The outbreak of the Covid-19 pandemic was a substantial stressor, especially for pregnant individuals. This paper uses Bayesian model and logistic regression to estimate levels of prenatal depression and anxiety during this hardship. The analysis reveals that the perceived threats to oneself and the unborn child are positively correlated to the mental distress, especially among younger pregnant individuals with lower levels of education and from lower-income families."
+date: "27 March 2024"
 date-format: "D MMMM YYYY"
 number-sections: true
 thanks: "Code and data in this analysis is available at: https://github.com/Elaineyi1/Prenatal_Mental_Health"
 bibliography: references.bib
 toc: true
 ---
+\newpage
 # Introduction {#sec-introduction}
 ```{r}
 #| include: false
@@ -38,6 +40,14 @@ clean_data <- read_csv(
 ```
 
 # Data {#sec-data}
+## Data Source and Measurement
+The prenatal mental health dataset from the Open Science Framework was designed to explore the relationship between exposure to objective hardship caused by the Covid -19 pandemic and psychological distress in pregnant individuals [@osfPregnancyDuring]. The  study population is pregnant individuals aged 17 or older, with gestation periods of no more than 35 weeks, residing in Canada. Data were collected from May 2020 to December 2021, containing demographic information, mental health data and basic birth outcomes [@nihPrenatalMental]. For this paper, I will only use data collected from May 2020 to December 2020 to analyze the prenatal mental health during the onset of the outbreak, a period highly marked by panic and hardship. 
+
+Participants were recruited through advertisements via pregnancy organizations, care providers, social media, and paid ads on Facebook and Instagram, with the chance to win a $500 gift card. A portion of advertisements targeted geographic regions and sociodemographic groups with less representation to reduce underrepresentation [@nihPrenatalMental]. 
+
+Prenatal data, including age, 2019 household income in Canadian dollars, and education level, were collected as part of the national Pregnancy during the COVID-19 Pandemic (PdP) project using online questionnaires through REDCap. Birth data were also acquired using parents reports in REDCap [@nihPrenatalMental]. Depression symptoms were self-assessed using the Edinburgh Postnatal Depression Scale (EPDS), consisting of 10 questions, each scored from 0 to 3, with possible scores ranging from 0 to 30. Anxiety symptoms were self-assessed by Patient-Reported Outcomes Measurement Information System (PROMIS), including 7 questions, each scored from 1 to 5, with possible total scores ranging from 7 to 35. Higher scores on both surveys indicate more severe depression or anxiety symptoms. The surveys were available in either English or French.
+
+Data are available for 10,772 participants. After excluding observations with missing values and setting the delivery month from May 2020 to December 2020, 3266 observations remain. Further details regarding data cleaning can be found in @sec-appendix. All participants in this study provided informed consent. 
 
 ```{r}
 #| include: false
@@ -285,7 +295,7 @@ clean_data |>
   theme_minimal() +
   labs(x = "The Level of Prenatal Anxiety", y = "Birth Length (centimeters)")
 ```
-
+\newpage
 # Appendix {#sec-appendix}
 ```{r}
 #| message: false
@@ -321,3 +331,5 @@ clean_data |>
   geom_jitter(color='darkgray', alpha=0.4) +
   geom_smooth() + theme_minimal()
 ```
+\newpage
+# References
