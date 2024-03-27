@@ -55,6 +55,23 @@ clean_data$month <- factor(clean_data$month, levels = month_levels)
 ```
 
 ```{r}
+#| label: fig-month
+#| fig-cap: Distribution of Levels of Depression and Anxiety by Month
+#| echo: false
+#| warning: false
+#| message: false
+#| layout-ncol: 2
+#| fig-subcap: ["Distribution of Edinburgh Postnatal Depression Scale Scores by Month", "Distribution of Promis Anxiety Scores by Months"]
+clean_data |>
+  ggplot(aes(x = month, y = EPDS)) +
+  geom_boxplot() + ylim(0,1)
+
+clean_data |>
+  ggplot(aes(x = month, y = PROMIS)) +
+  geom_boxplot() + ylim(0,1)
+```
+
+```{r}
 #| message: false
 #| echo: false
 #| warning: false
@@ -102,19 +119,19 @@ clean_data |> group_by(age_group, language) |>
 ```
 
 ```{r}
-#| label: fig-average_depression
-#| fig-cap: Distribution of Levels of Depression by Education and Household Income
+#| label: fig-average_depression_and_anxiety
+#| fig-cap: Distribution of Levels of Depression and Anxiety by Education and Household Income
 #| echo: false
 #| warning: false
 #| message: false
 #| layout-ncol: 2
-#| fig-subcap: ["Distribution of Levels of Depression by Education", "Distribution of Levels of Depression by Household Income"]
+#| fig-subcap: ["Distribution of Levels of Depression by Education", "Distribution of Levels of Depression by Household Income", "Distribution of Levels of Anxiety by Education", "Distribution of Levels of Anxiety by Household Income"]
 clean_data %>%
   group_by(maternal_education) %>%
   summarise(average_depression = mean(EPDS)) %>%
   ggplot(aes(x = maternal_education, y = average_depression)) +
   geom_bar(stat = "identity", fill = "cornflowerblue") + geom_text(aes(label = round(average_depression, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.5) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.7) +
   labs(x="Education", y="Average Level of Depression")
 
 clean_data %>%
@@ -122,18 +139,9 @@ clean_data %>%
   summarise(average_depression = mean(EPDS)) %>%
   ggplot(aes(x = household_income, y = average_depression)) + 
   geom_text(aes(label = round(average_depression, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.5)+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.7)+
   geom_bar(stat = "identity", fill = "cornflowerblue") + labs(x="Household Income in 2019", y="Average Level of Depression")
-```
 
-```{r}
-#| label: fig-average_anxiety
-#| fig-cap: Distribution of Levels of Anxiety by Education and Household Income
-#| echo: false
-#| warning: false
-#| message: false
-#| layout-ncol: 2
-#| fig-subcap: ["Distribution of Levels of Anxiety by Education", "Distribution of Levels of Anxiety by Household Income"]
 clean_data %>%
   group_by(maternal_education) %>%
   summarise(average_anxiety = mean(PROMIS)) %>%
@@ -152,22 +160,44 @@ clean_data %>%
   labs(x="Household Income in 2019", y="Average Level of Anxiety")
 ```
 
-
 ```{r}
-#| label: fig-month
-#| fig-cap: Distribution of Levels of Depression and Anxiety by Month
+#| label: fig-danger
+#| fig-cap: Relationship between Perceived Level of Danger and Prenatal Mental Health
 #| echo: false
 #| warning: false
 #| message: false
 #| layout-ncol: 2
-#| fig-subcap: ["Distribution of Edinburgh Postnatal Depression Scale Scores by Month", "Distribution of Promis Anxiety Scores by Months"]
+#| fig-subcap: ["Perceived Danger to Self and Depression", "Perceived Danger to the Unborn and Depression", "Perceived Danger to Self and Anxiety", "Perceived Danger to the Unborn and Anxiety"]
 clean_data |>
-  ggplot(aes(x = month, y = EPDS)) +
-  geom_boxplot() + ylim(0,1)
+  ggplot(aes(x = threaten_life, y = EPDS, color = language)) +
+  geom_smooth(method = "lm") + 
+  geom_hline(yintercept = 0.3, linetype = "dashed", color = "black") +
+  theme_classic() + 
+  geom_text(aes(x = 1, y = 0.3, label = "0.3"), color = "black", vjust = -0.5, hjust = 1) +
+  labs(x="Perceived Level of Danger", y = "Level of Prenatal Depression")+ ylim(0,1)
 
 clean_data |>
-  ggplot(aes(x = month, y = PROMIS)) +
-  geom_boxplot() + ylim(0,1)
+  ggplot(aes(x = threaten_baby_danger, y = EPDS, color = language)) +
+  geom_smooth(method = "lm") + 
+  geom_hline(yintercept = 0.3, linetype = "dashed", color = "black") +
+  theme_classic() + 
+  geom_text(aes(x = 1, y = 0.3, label = "0.3"), color = "black", vjust = -0.5, hjust = 1) +
+  labs(x="Perceived Danger to Unborn Baby's Life", y = "Level of Prenatal Depression") + ylim(0,1)
+
+clean_data |>
+  ggplot(aes(x = threaten_life, y = PROMIS, color = language)) +
+  geom_smooth(method = "lm") +
+  theme_classic() + geom_hline(yintercept = 0.5, linetype = "dashed", color = "black")+
+  geom_text(aes(x = 1, y = 0.5, label = "0.5"), color = "black", vjust = -0.5, hjust = 1) +
+  labs(x="Perceived Level of Danger", y = "Level of Prenatal Anxiety")+ ylim(0,1)
+
+clean_data |>
+  ggplot(aes(x = threaten_baby_danger, y = PROMIS, color = language)) +
+  geom_smooth(method = "lm") + 
+  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") +
+  theme_classic() + 
+  geom_text(aes(x = 1, y = 0.5, label = "0.5"), color = "black", vjust = -0.5, hjust = 1) +
+  labs(x="Perceived Danger to Unborn Baby's Life", y = "Level of Prenatal Anxiety") + ylim(0,1) 
 ```
 
 # Model {#sec-model}
@@ -190,7 +220,16 @@ anxiety_model <- readRDS(file = here::here("model/anxiety.rds"))
 #| tbl-cap: Estimating Prenatal Depression given Age, Household Income, Education Level and Choice of Language
 modelsummary(
   list(
-    "Level of Depression" = depression_model))
+    "Depression" = depression_model))
+```
+```{r}
+#| message: false
+#| echo: false
+#| warning: false
+#| label: fig-depression_interval
+#| fig-cap: The Coefficients and Confidence Interval in the Depression Model
+modelplot(depression_model, conf_level = 0.95, color = 'royalblue3') +
+  labs(x = "Depression and 95% Confidence Interval")
 ```
 
 ```{r}
@@ -201,18 +240,9 @@ modelsummary(
 #| tbl-cap: Estimating Prenatal Anxiety given Age Group, Household Income, Education Level and Choice of Language.
 modelsummary(
   list(
-    "Level of Anxiety" = anxiety_model))
+    "Anxiety" = anxiety_model))
 ```
 
-```{r}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: fig-depression_interval
-#| fig-cap: The Coefficients and Confidence Interval in the Depression Model
-modelplot(depression_model, conf_level = 0.95, color = 'royalblue3') +
-  labs(x = "Estimating Depression and 95% Confidence Interval")
-```
 
 ```{r}
 #| message: false
@@ -221,11 +251,10 @@ modelplot(depression_model, conf_level = 0.95, color = 'royalblue3') +
 #| label: fig-anxiety_interval
 #| fig-cap: The Coefficients and Confidence Interval in the Anxiety Model
 modelplot(anxiety_model, conf_level = 0.95, color = 'indianred3') +
-  labs(x = "Estimating Anxiety and 95% Confidence Interval")
+  labs(x = "Anxiety and 95% Confidence Interval")
 ```
 
 # Discussions {#sec-discussions}
-
 ```{r}
 #| label: fig-weight_length_delivery
 #| fig-cap: Distribution of Birth Weight and Length and Prenatal Mental Health by Delivery Mode
@@ -233,7 +262,7 @@ modelplot(anxiety_model, conf_level = 0.95, color = 'indianred3') +
 #| warning: false
 #| message: false
 #| layout-ncol: 2
-#| fig-subcap: ["Distribution of Birth Weight and Depression by Delivery Mode", "Distribution of Birth Weight and Anxiety by Delivery Mode", "Distribution of Birth Length and Depression by Delivery Mode", "Distribution of Birth Length and Anxiety by Delivery Mode"]
+#| fig-subcap: ["Birth Weight and Depression by Delivery Mode", "Birth Weight and Anxiety by Delivery Mode", "Birth Length and Depression by Delivery Mode", "Birth Length and Anxiety by Delivery Mode"]
 clean_data |>
   ggplot(aes(x = EPDS, y = birth_weight, color = delivery_mode)) +
   geom_smooth(method = "lm")+
@@ -291,40 +320,4 @@ clean_data |>
   ggplot(aes(x = threaten_baby_danger, y = threaten_baby_harm)) +
   geom_jitter(color='darkgray', alpha=0.4) +
   geom_smooth() + theme_minimal()
-```
-
-```{r}
-#| label: fig-danger
-#| fig-cap: Association between Perceived Level of Danger and Prenatal Mental Health
-#| echo: false
-#| warning: false
-#| message: false
-#| layout-ncol: 2
-#| fig-subcap: ["Relationship between Perceived Danger to Self and Depression", "Relationship between Perceived Danger to the Unborn and Depression", "Relationship between Perceived Danger to Self and Anxiety", "Relationship between Perceived Danger to the Unborn and Anxiety"]
-clean_data |>
-  ggplot(aes(x = threaten_life, y = EPDS, color = language)) +
-  geom_smooth(method = "lm") + 
-  geom_hline(yintercept = 0.3, linetype = "dashed", color = "black") +
-  theme_classic() + 
-  labs(x="Perceived Level of Danger", y = "Level of Prenatal Depression")+ ylim(0,1)
-
-clean_data |>
-  ggplot(aes(x = threaten_baby_danger, y = EPDS, color = language)) +
-  geom_smooth(method = "lm") + 
-  geom_hline(yintercept = 0.3, linetype = "dashed", color = "black") +
-  theme_classic() +
-  labs(x="Perceived Danger to Unborn Baby's Life", y = "Level of Prenatal Depression") + ylim(0,1)
-
-clean_data |>
-  ggplot(aes(x = threaten_life, y = PROMIS, color = language)) +
-  geom_smooth(method = "lm") +
-  theme_classic() + geom_hline(yintercept = c(0.4, 0.6), linetype = "dashed", color = "black")+
-  labs(x="Perceived Level of Danger", y = "Level of Prenatal Anxiety")+ ylim(0,1)
-
-clean_data |>
-  ggplot(aes(x = threaten_baby_danger, y = PROMIS, color = language)) +
-  geom_smooth(method = "lm") + 
-  geom_hline(yintercept = c(0.4, 0.6), linetype = "dashed", color = "black") +
-  theme_classic() +
-  labs(x="Perceived Danger to Unborn Baby's Life", y = "Level of Prenatal Anxiety") + ylim(0,1) 
 ```

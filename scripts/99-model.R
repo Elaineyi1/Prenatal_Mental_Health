@@ -30,7 +30,7 @@ clean_data$month <- factor(clean_data$month, levels = month_levels)
 # Depression Model
 depression_model <-
   stan_glm(
-    EPDS ~ age_group + household_income + language + maternal_education,
+    EPDS ~ age_group + household_income + language + maternal_education + threaten_life + threaten_baby_danger,
     data = clean_data,
     family = binomial(link = "logit"),
     prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
@@ -47,7 +47,7 @@ saveRDS(
 # Anxiety Model
 anxiety_model <-
   stan_glm(
-    PROMIS ~ age_group + household_income + language + maternal_education,
+    PROMIS ~ age_group + household_income + language + maternal_education + threaten_life + threaten_baby_danger,
     data = clean_data,
     family = binomial(link = "logit"),
     prior = normal(location = 0, scale = 2.5, autoscale = TRUE),
@@ -60,5 +60,4 @@ saveRDS(
   anxiety_model,
   file = "model/anxiety.rds"
 )
-
 
