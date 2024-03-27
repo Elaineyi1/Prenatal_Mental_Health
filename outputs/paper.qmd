@@ -131,7 +131,7 @@ clean_data %>%
   summarise(average_depression = mean(EPDS)) %>%
   ggplot(aes(x = maternal_education, y = average_depression)) +
   geom_bar(stat = "identity", fill = "cornflowerblue") + geom_text(aes(label = round(average_depression, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.7) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6) +
   labs(x="Education", y="Average Level of Depression")
 
 clean_data %>%
@@ -139,7 +139,7 @@ clean_data %>%
   summarise(average_depression = mean(EPDS)) %>%
   ggplot(aes(x = household_income, y = average_depression)) + 
   geom_text(aes(label = round(average_depression, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.7)+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6)+
   geom_bar(stat = "identity", fill = "cornflowerblue") + labs(x="Household Income in 2019", y="Average Level of Depression")
 
 clean_data %>%
@@ -147,7 +147,7 @@ clean_data %>%
   summarise(average_anxiety = mean(PROMIS)) %>%
   ggplot(aes(x = maternal_education, y = average_anxiety)) +
   geom_bar(stat = "identity", fill = "salmon2") + geom_text(aes(label = round(average_anxiety, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.7)+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6)+
   labs(x="Education", y="Average Level of Anxiety")
 
 clean_data %>%
@@ -156,7 +156,7 @@ clean_data %>%
   ggplot(aes(x = household_income, y = average_anxiety)) + 
   geom_bar(stat = "identity", fill = "salmon2") +
   geom_text(aes(label = round(average_anxiety, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.7) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6) +
   labs(x="Household Income in 2019", y="Average Level of Anxiety")
 ```
 
@@ -187,16 +187,16 @@ clean_data |>
 clean_data |>
   ggplot(aes(x = threaten_life, y = PROMIS, color = language)) +
   geom_smooth(method = "lm") +
-  theme_classic() + geom_hline(yintercept = 0.5, linetype = "dashed", color = "black")+
-  geom_text(aes(x = 1, y = 0.5, label = "0.5"), color = "black", vjust = -0.5, hjust = 1) +
+  theme_classic() + geom_hline(yintercept = 0.4, linetype = "dashed", color = "black")+
+  geom_text(aes(x = 1, y = 0.4, label = "0.4"), color = "black", vjust = -0.5, hjust = 1) +
   labs(x="Perceived Level of Danger", y = "Level of Prenatal Anxiety")+ ylim(0,1)
 
 clean_data |>
   ggplot(aes(x = threaten_baby_danger, y = PROMIS, color = language)) +
   geom_smooth(method = "lm") + 
-  geom_hline(yintercept = 0.5, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = 0.4, linetype = "dashed", color = "black") +
   theme_classic() + 
-  geom_text(aes(x = 1, y = 0.5, label = "0.5"), color = "black", vjust = -0.5, hjust = 1) +
+  geom_text(aes(x = 1, y = 0.4, label = "0.4"), color = "black", vjust = -0.5, hjust = 1) +
   labs(x="Perceived Danger to Unborn Baby's Life", y = "Level of Prenatal Anxiety") + ylim(0,1) 
 ```
 
