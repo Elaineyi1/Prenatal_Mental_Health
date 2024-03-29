@@ -1,6 +1,5 @@
 ---
-title: "Exploring Depression and Anxiety: Objective Hardship Exposure and Psychological Distress Among Pregnant Individuals"
-subtitle: "Analysis of Prenatal Mental Health During the Covid-19 Pandemic"
+title: "Depression, Anxiety, and Objective Hardship: Examining Prenatal Mental Health During the Covid-19 Pandemic in Canada"
 author: 
   - Boxuan Yi
 format: 
@@ -43,9 +42,7 @@ clean_data <- read_csv(
 ## Data Source and Measurement
 The prenatal mental health dataset from the Open Science Framework was designed to explore the relationship between exposure to objective hardship caused by the Covid -19 pandemic and psychological distress in pregnant individuals [@osfPregnancyDuring]. The  study population is pregnant individuals aged 17 or older, with gestation periods of no more than 35 weeks, residing in Canada. Data were collected from May 2020 to December 2021, containing demographic information, mental health data and basic birth outcomes [@nihPrenatalMental]. For this paper, I will only use data collected from May 2020 to December 2020 to analyze the prenatal mental health during the onset of the outbreak, a period highly marked by panic and hardship. 
 
-Participants were recruited through advertisements via pregnancy organizations, care providers, social media, and paid ads on Facebook and Instagram, with the chance to win a $500 gift card. A portion of advertisements targeted geographic regions and sociodemographic groups with less representation to reduce underrepresentation [@nihPrenatalMental]. 
-
-Prenatal data, including age, 2019 household income in Canadian dollars, and education level, were collected as part of the national Pregnancy during the COVID-19 Pandemic (PdP) project using online questionnaires through REDCap. Birth data were also acquired using parents reports in REDCap [@nihPrenatalMental]. Depression symptoms were self-assessed using the Edinburgh Postnatal Depression Scale (EPDS), consisting of 10 questions, each scored from 0 to 3, with possible scores ranging from 0 to 30. Anxiety symptoms were self-assessed by Patient-Reported Outcomes Measurement Information System (PROMIS), including 7 questions, each scored from 1 to 5, with possible total scores ranging from 7 to 35. Higher scores on both surveys indicate more severe depression or anxiety symptoms. The surveys were available in either English or French.
+Participants were recruited through advertisements via pregnancy organizations, care providers, social media, and paid ads on Facebook and Instagram, with the chance to win a $500 gift card. A portion of advertisements targeted geographic regions and sociodemographic groups with less representation to reduce underrepresentation [@nihPrenatalMental]. Prenatal data, including age, 2019 household income in Canadian dollars, and education level, were collected as part of the national Pregnancy during the COVID-19 Pandemic (PdP) project using online questionnaires through REDCap. Birth data were also acquired using parents reports in REDCap [@nihPrenatalMental]. Depression symptoms were self-assessed using the Edinburgh Postnatal Depression Scale (EPDS), consisting of 10 questions, each scored from 0 to 3, with possible scores ranging from 0 to 30. Anxiety symptoms were self-assessed by Patient-Reported Outcomes Measurement Information System (PROMIS), including 7 questions, each scored from 1 to 5, with possible total scores ranging from 7 to 35. Higher scores on both surveys indicate more severe depression or anxiety symptoms. In this paper, the EPDS scores are divided by 30, and the PROMIS scores are adjusted by subtracting 7 from the original scores and then dividing by 35, and hence, making the level of depression and anxiety between 0 and 1 to standardize the scale. The surveys were available in either English or French.
 
 Data are available for 10,772 participants. After excluding observations with missing values and setting the delivery month from May 2020 to December 2020, 3266 observations remain. Further details regarding data cleaning can be found in @sec-appendix. All participants in this study provided informed consent. 
 
@@ -114,60 +111,93 @@ clean_data |>
 ```
 
 ```{r}
-#| message: false
-#| echo: false
-#| warning: false
-#| label: tbl-age_language
-#| tbl-cap: Levels of Depression and Anxiety Among Different Age Groups
-clean_data |> group_by(age_group, language) |> 
-  summarise(average_depression = mean(EPDS), average_anxiety = mean(PROMIS)) |> 
-  rename("Age Group" = age_group, 
-         "Survey Language" = language,
-         "Average Level of Depression" = average_depression, 
-         "Average Level of Anxiety" = average_anxiety) |>
-  kable()
-```
-
-```{r}
-#| label: fig-average_depression_and_anxiety
-#| fig-cap: Distribution of Levels of Depression and Anxiety by Education and Household Income
+#| label: fig-age_language_dep_anx
+#| fig-cap: Levels of Depression and Anxiety Among Pregnant Individuals Grouped By Age and Language
 #| echo: false
 #| warning: false
 #| message: false
 #| layout-ncol: 2
-#| fig-subcap: ["Distribution of Levels of Depression by Education", "Distribution of Levels of Depression by Household Income", "Distribution of Levels of Anxiety by Education", "Distribution of Levels of Anxiety by Household Income"]
-clean_data %>%
-  group_by(maternal_education) %>%
-  summarise(average_depression = mean(EPDS)) %>%
-  ggplot(aes(x = maternal_education, y = average_depression)) +
-  geom_bar(stat = "identity", fill = "cornflowerblue") + geom_text(aes(label = round(average_depression, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6) +
-  labs(x="Education", y="Average Level of Depression")
+#| fig-subcap: ["Age and Depression", "Language and Depression", "Age and Anxiety", "Language and Anxiety"]
+clean_data |> 
+  ggplot(aes(x=age_group,fill = factor(depression))) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("0" = "lightcyan3", "1" = "cadetblue"), 
+                    labels = c("No or Mild Depression", "Moderate Depression or more"))+
+  coord_flip()+
+  labs(fill = "Depression", x = "Age Group", y = "Proportion") +
+  guides(fill = guide_legend(position = "bottom"))
 
-clean_data %>%
-  group_by(household_income) %>%
-  summarise(average_depression = mean(EPDS)) %>%
-  ggplot(aes(x = household_income, y = average_depression)) + 
-  geom_text(aes(label = round(average_depression, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6)+
-  geom_bar(stat = "identity", fill = "cornflowerblue") + labs(x="Household Income in 2019", y="Average Level of Depression")
+clean_data |>
+  ggplot(aes(x = language, fill = factor(depression))) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("0" = "lightcyan3", "1" = "cadetblue"), 
+                    labels = c("No or Mild Depression", "Moderate Depression or more")) +
+  coord_flip() +
+  labs(fill = "Depression", x = "Language of the Survey", y = "Proportion") +
+  guides(fill = guide_legend(position = "bottom"))
 
-clean_data %>%
-  group_by(maternal_education) %>%
-  summarise(average_anxiety = mean(PROMIS)) %>%
-  ggplot(aes(x = maternal_education, y = average_anxiety)) +
-  geom_bar(stat = "identity", fill = "salmon2") + geom_text(aes(label = round(average_anxiety, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6)+
-  labs(x="Education", y="Average Level of Anxiety")
+clean_data |>
+  ggplot(aes(x = age_group, fill = factor(anxiety))) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("0" = "#f4bfb6", "1" = "#f09286"), 
+                    labels = c("No or Mild Anxiety", "Moderately Anxiety or more")) +
+  coord_flip() +
+  labs(fill = "Anxiety", x = "Age Group", y = "Proportion")+
+  guides(fill = guide_legend(position = "bottom"))
 
-clean_data %>%
-  group_by(household_income) %>%
-  summarise(average_anxiety = mean(PROMIS)) %>%
-  ggplot(aes(x = household_income, y = average_anxiety)) + 
-  geom_bar(stat = "identity", fill = "salmon2") +
-  geom_text(aes(label = round(average_anxiety, 3)), vjust = -0.5) +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6) +
-  labs(x="Household Income in 2019", y="Average Level of Anxiety")
+clean_data |>
+  ggplot(aes(x = language, fill = factor(anxiety))) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("0" = "#f4bfb6", "1" = "#f09286"), 
+                    labels = c("No or Mild Anxiety", "Moderate Anxiety or more")) +
+  coord_flip() +
+  labs(fill = "Anxiety", x = "Language of the Survey", y = "Proportion") +
+  guides(fill = guide_legend(position = "bottom"))
+```
+
+```{r}
+#| label: fig-income_education_dep_anx
+#| fig-cap: Levels of Depression and Anxiety Among Pregnant Individuals Grouped By Household Income and Education
+#| echo: false
+#| warning: false
+#| message: false
+#| layout-ncol: 2
+#| fig-subcap: ["Income and Depression", "Education and Depression", "Income and Anxiety", "Education and Anxiety"]
+clean_data |> 
+  ggplot(aes(x=household_income,fill = factor(depression))) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("0" = "lightcyan3", "1" = "cadetblue"), 
+                    labels = c("No or Mild Depression", "Moderate Depression or more"))+
+  coord_flip()+
+  labs(fill = "Depression", x = "Household Income in 2019", y = "Proportion") + 
+  guides(fill = guide_legend(position = "bottom"))
+
+clean_data |>
+  ggplot(aes(x = maternal_education, fill = factor(depression))) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("0" = "lightcyan3", "1" = "cadetblue"), 
+                    labels = c("No or Mild Depression", "Moderate Depression or more")) +
+  coord_flip() +
+  labs(fill = "Depression", x = "Level of Education", y = "Proportion")+
+  guides(fill = guide_legend(position = "bottom"))
+
+clean_data |>
+  ggplot(aes(x = household_income, fill = factor(anxiety))) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("0" = "#f4bfb6", "1" = "#f09286"), 
+                    labels = c("No or Mild Anxiety", "Moderately Anxiety or more")) +
+  coord_flip() +
+  labs(fill = "Anxiety", x = "Household Income in 2019", y = "Proportion")+
+  guides(fill = guide_legend(position = "bottom"))
+
+clean_data |>
+  ggplot(aes(x = maternal_education, fill = factor(anxiety))) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("0" = "#f4bfb6", "1" = "#f09286"), 
+                    labels = c("No or Mild Anxiety", "Moderate Anxiety or more")) +
+  coord_flip() +
+  labs(fill = "Anxiety", x = "Level of Education", y = "Proportion")+
+  guides(fill = guide_legend(position = "bottom"))
 ```
 
 ```{r}
@@ -232,6 +262,7 @@ modelsummary(
   list(
     "Depression" = depression_model))
 ```
+
 ```{r}
 #| message: false
 #| echo: false
@@ -241,6 +272,7 @@ modelsummary(
 modelplot(depression_model, conf_level = 0.95, color = 'royalblue3') +
   labs(x = "Depression and 95% Confidence Interval")
 ```
+
 
 ```{r}
 #| message: false
@@ -298,26 +330,45 @@ clean_data |>
 \newpage
 # Appendix {#sec-appendix}
 ```{r}
-#| message: false
+#| label: fig-average_depression_and_anxiety
+#| fig-cap: Distribution of Levels of Depression and Anxiety by Education and Household Income
 #| echo: false
 #| warning: false
-#| label: fig-language_income_education
-#| fig-cap: Income and Education Groups Distribution Based on the Choice of Survey Language
+#| message: false
 #| layout-ncol: 2
-#| fig-subcap: ["Distribution of Income by Language", "Distribution of Education by Language"]
-clean_data |>
-  ggplot(aes(x = household_income, fill = language)) +
-  stat_count(position = "dodge") +
-  theme_minimal() +
-  coord_flip() +
-  scale_fill_brewer(palette = "Set1") + theme(legend.position = "bottom")
+#| fig-subcap: ["Distribution of Levels of Depression by Education", "Distribution of Levels of Depression by Household Income", "Distribution of Levels of Anxiety by Education", "Distribution of Levels of Anxiety by Household Income"]
+clean_data %>%
+  group_by(maternal_education) %>%
+  summarise(average_depression = mean(EPDS)) %>%
+  ggplot(aes(x = maternal_education, y = average_depression)) +
+  geom_bar(stat = "identity", fill = "cornflowerblue") + geom_text(aes(label = round(average_depression, 3)), vjust = -0.5) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6) +
+  labs(x="Education", y="Average Level of Depression")
 
-clean_data |>
-  ggplot(aes(x = maternal_education, fill = language)) +
-  stat_count(position = "dodge") +
-  theme_minimal() +
-  coord_flip() +
-  scale_fill_brewer(palette = "Set1") + theme(legend.position = "bottom")
+clean_data %>%
+  group_by(household_income) %>%
+  summarise(average_depression = mean(EPDS)) %>%
+  ggplot(aes(x = household_income, y = average_depression)) + 
+  geom_text(aes(label = round(average_depression, 3)), vjust = -0.5) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6)+
+  geom_bar(stat = "identity", fill = "cornflowerblue") + labs(x="Household Income in 2019", y="Average Level of Depression")
+
+clean_data %>%
+  group_by(maternal_education) %>%
+  summarise(average_anxiety = mean(PROMIS)) %>%
+  ggplot(aes(x = maternal_education, y = average_anxiety)) +
+  geom_bar(stat = "identity", fill = "salmon2") + geom_text(aes(label = round(average_anxiety, 3)), vjust = -0.5) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6)+
+  labs(x="Education", y="Average Level of Anxiety")
+
+clean_data %>%
+  group_by(household_income) %>%
+  summarise(average_anxiety = mean(PROMIS)) %>%
+  ggplot(aes(x = household_income, y = average_anxiety)) + 
+  geom_bar(stat = "identity", fill = "salmon2") +
+  geom_text(aes(label = round(average_anxiety, 3)), vjust = -0.5) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6) +
+  labs(x="Household Income in 2019", y="Average Level of Anxiety")
 ```
 
 ```{r}
