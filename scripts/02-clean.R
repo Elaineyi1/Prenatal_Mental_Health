@@ -46,7 +46,9 @@ clean_data <- raw_data_complete |>  filter(year == '2020') |> filter(month != 'A
   select(age_group, maternal_age, income, maternal_education, birth_weight, birth_length,
          delivery_mode, language, threaten_life, threaten_baby_danger, threaten_baby_harm, 
          month, EPDS, PROMIS) |>
-  rename(household_income = income)
+  rename(household_income = income) |> 
+  mutate(depression = case_when(EPDS >= 0.4 ~ 1, EPDS < 0.4 ~ 0),
+         anxiety = case_when(PROMIS >= 0.464 ~ 1, PROMIS < 0.464 ~ 0))
 
 write.csv(
   x = clean_data,
