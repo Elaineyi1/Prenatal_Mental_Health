@@ -6,8 +6,8 @@ format:
   pdf:
     documentclass: article
     geometry: margin = 1in
-    abstract: "The outbreak of the Covid-19 pandemic was a substantial stressor, especially for pregnant individuals. This paper uses Bayesian model and logistic regression to estimate levels of prenatal depression and anxiety during this hardship. The analysis reveals that the perceived threats to oneself and the unborn child are positively correlated to the mental distress, especially among younger pregnant individuals with lower levels of education and from lower-income families."
-date: "27 March 2024"
+    abstract: "The outbreak of the Covid-19 pandemic was a substantial stressor, especially for pregnant individuals. Since depression and anxiety beyond moderate levels are considered clinically significant, this paper uses Bayesian model and logistic regression to evaluate the probability of experiencing at least moderate levels of prenatal depression or anxiety during the pandemic. The analysis reveals that the perceived threats to oneself and the unborn child are strongly correlated to the mental distress, especially among younger pregnant individuals with lower levels of education and from lower-income families."
+date: "30 March 2024"
 date-format: "D MMMM YYYY"
 number-sections: true
 thanks: "Code and data in this analysis is available at: https://github.com/Elaineyi1/Prenatal_Mental_Health"
@@ -16,6 +16,11 @@ toc: true
 ---
 \newpage
 # Introduction {#sec-introduction}
+While pregnancy and childbirth are often moments of joy, they can also bring about distress as mothers navigate physical changes, uncertainties and responsibilities. In the 12 months before childbirth, 12.5% of women in Canada reported that most days were very stressful, while 7.5% of women reported depressive or anxious symptoms [@canadaPregnancyWomenaposs].  These figures are likely to increase during the COVID-19 pandemic due to the heightened uncertainty and panic. Maternal depression and anxiety during pregnancy are associated with adverse neurodevelopmental outcomes for the offspring, such as hyperactivity disorder, autism, poor cognitive or emotional developmental [@MPMHPbeta], and thus, prenatal mental health is crucial for both mothers and children. In light of this, I utilize data from the Open Science Framework [@osfPregnancyDuring] to explore factors contributing to maternal depression and anxiety during the pandemic, along with associated birth outcomes. This analysis could also shed light on mothers’ mental health during other objective hardships or the general effects of prenatal distress.
+
+Given that moderate depression and anxiety can impair daily functioning, this paper distinguishes between levels of distress and use logistic regression to estimate the likelihood of pregnant individuals experiencing at least moderate levels of depression and anxiety in Canada during the pandemic. Predictors include age, education, household income, language preference, and perceived threat to oneself and the unborn baby. The results indicate that young pregnant individuals with lower education and income, as well as a high perception of danger to both themselves and their unborn child, are more likely to experience at least moderate depression and anxiety. Furthermore, participants who completed the survey in French demonstrated a lower likelihood of getting distress compared to those who responded in English. While the dataset used in this paper provides valuable information on pregnant participants’ demographic information, basic birth outcomes, and mental health data, it does not include any information on newborns’ health. Consequently, this paper mainly focuses on the maternal well-being and its affects on mothers.
+
+This paper is constructed as follows: The data utilized for analysis is discussed in @sec-data. Following that, two models, one for depression and one for anxiety, is introduced in @sec-model. @sec-results then talks about the results derived from the models. Lastly, I will discuss the findings in a broader context and address limitations of this paper as well as the future explorations in @sec-discussion. This paper uses the programming language R [@r]. The analysis, the model and the visualizations use the following packages: `rstanarm` [@rrstanarm], `modelsummary` [@rmodelsummary], `ggplot2` [@rggplot2], `dplyr` [@rdplyr], `readr` [@rreadr], `janitor` [@rjanitor], `arrow` [@rarrow], `here` [@rhere], `broom` [@rbroom], and `knitr` [@rknitr].
 ```{r}
 #| include: false
 library(arrow)
@@ -39,13 +44,16 @@ clean_data <- read_csv(
 ```
 
 # Data {#sec-data}
-## Data Source and Measurement
+## Data Overview and Measurement
 The prenatal mental health dataset from the Open Science Framework was designed to explore the relationship between exposure to objective hardship caused by the Covid -19 pandemic and psychological distress in pregnant individuals [@osfPregnancyDuring]. The  study population is pregnant individuals aged 17 or older, with gestation periods of no more than 35 weeks, residing in Canada. Data were collected from May 2020 to December 2021, containing demographic information, mental health data and basic birth outcomes [@nihPrenatalMental]. For this paper, I will only use data collected from May 2020 to December 2020 to analyze the prenatal mental health during the onset of the outbreak, a period highly marked by panic and hardship. 
 
-Participants were recruited through advertisements via pregnancy organizations, care providers, social media, and paid ads on Facebook and Instagram, with the chance to win a $500 gift card. A portion of advertisements targeted geographic regions and sociodemographic groups with less representation to reduce underrepresentation [@nihPrenatalMental]. Prenatal data, including age, 2019 household income in Canadian dollars, and education level, were collected as part of the national Pregnancy during the COVID-19 Pandemic (PdP) project using online questionnaires through REDCap. Birth data were also acquired using parents reports in REDCap [@nihPrenatalMental]. Depression symptoms were self-assessed using the Edinburgh Postnatal Depression Scale (EPDS), consisting of 10 questions, each scored from 0 to 3, with possible scores ranging from 0 to 30. Anxiety symptoms were self-assessed by Patient-Reported Outcomes Measurement Information System (PROMIS), including 7 questions, each scored from 1 to 5, with possible total scores ranging from 7 to 35. Higher scores on both surveys indicate more severe depression or anxiety symptoms. In this paper, the EPDS scores are divided by 30, and the PROMIS scores are adjusted by subtracting 7 from the original scores and then dividing by 35, and hence, making the level of depression and anxiety between 0 and 1 to standardize the scale. The surveys were available in either English or French.
+Participants were recruited through advertisements via pregnancy organizations, care providers, social media, and paid ads on Facebook and Instagram, with the chance to win a $500 gift card. A portion of advertisements targeted geographic regions and sociodemographic groups with less representation to reduce underrepresentation [@nihPrenatalMental]. The surveys were available in either English or French. Prenatal data, including age, 2019 household income in Canadian dollars, and education level, were collected as part of the national Pregnancy during the COVID-19 Pandemic (PdP) project using online questionnaires through REDCap. Birth data were also acquired using parents reports in REDCap [@nihPrenatalMental]. Depression symptoms were self-assessed using the Edinburgh Postnatal Depression Scale (EPDS), consisting of 10 questions, each scored from 0 to 3, with possible scores ranging from 0 to 30 [@EDPSstanford]. Anxiety symptoms were self-assessed by Patient-Reported Outcomes Measurement Information System (PROMIS), including 7 questions, each scored from 1 to 5, with possible total scores ranging from 7 to 35 [@psychiatry]. Higher scores on both surveys indicate more severe depression or anxiety symptoms. In this paper, the EPDS scores are divided by 30, and the PROMIS scores are adjusted by subtracting 7 from the original scores and then dividing by 35, and hence, making the level of depression and anxiety between 0 and 1 to standardize the scale. 
 
-Data are available for 10,772 participants. After excluding observations with missing values and setting the delivery month from May 2020 to December 2020, 3266 observations remain. Further details regarding data cleaning can be found in @sec-appendix. All participants in this study provided informed consent. 
+Two new binary variables named `depression` and `anxiety` are created. Mothers scoring above 12, which represents 40% on the EPDS scale, are likely to be suffering from depression and should seek medical attention [@EDPSstanford]. Consequently, the variable `depression` is assigned to a value of 1 if the EPDS score is greater than or equal to 0.4, and 0 otherwise. Similarly, the `PROMIS` score of at least 20 indicates at least moderate depression. Hence, the variable `anxiety` is assigned to 1 if the `PROMIS` is larger or equal to 0.464, and 0 if it is smaller than 0.464. 
 
+This paper distinguishes between levels of mental health using the term ‘moderate’, as symptoms of moderate depression may become severe enough to influence daily life [@healthlineMildModerate]. Additionally, though mild anxiety may not always meet clinical significance criteria, anxiety reaching a moderate level is generally considered significant [@betterhelpWhatDifferent]. During the early stages of the pandemic, especially among pregnant individuals, there is a higher likelihood of experiencing depression or anxiety symptoms. Therefore, I will focus on the estimation of at least moderate depression/anxiety.  In this analysis, “depression” refers to being at least moderately depressed, while “no depression” indicates not reaching the level of moderate depression; “anxiety” refers to being at least moderately anxious, while “no anxiety” indicates not reaching the level of moderate anxiety. Data are available for 10,772 participants. After excluding observations with missing values and setting the delivery month from May 2020 to December 2020, 3266 observations remain. Further details regarding data cleaning can be found in @sec-appendix-cleaning. All participants in this study provided informed consent. Participants with higher education levels and higher household income exhibit lower levels of depression and anxiety.
+
+## Data Analysis
 ```{r}
 #| include: false
 age_levels <- c("Under 27", "27 to 34", "35 to 39", "40 and above")
@@ -77,6 +85,11 @@ clean_data |>
   ggplot(aes(x = month, y = PROMIS)) +
   geom_boxplot() + ylim(0,1)
 ```
+[@fig-month] provides an overview of the levels of depression and anxiety spanning from May 2020 to December 2020. Overall, there is a decreasing trend observed in both scales with the occurrence of the pandemic. On average, the level of anxiety tends to be slightly higher than that of depression, with the majority experiencing depression levels below 0.5. However, depression exhibits more higher outliers, implying that some individuals experience significantly severe depression symptoms compared to the average. Mothers scoring above 12 or 13, which represents 40%, are likely to be suffering from depression and should seek medical attention [@EDPSstanford]. Hence, the distributions in [@fig-month] indicate a considerable number of pregnant individuals may be experiencing distress, given that the means fall within the range of 0.3 to 0.5.
+
+The mean age of mothers at the time of delivery in Canada is approximately 31 [@statcanMeanMother]. Since the dataset contains maternal ages ranging from 18.5 to 49, and 35 and above is categorized as advanced maternal age [@nihMaternalRisk], I have grouped the ages as follows: Under 27, 27 to 34, 35 to 39, and 40 and above. The distribution of pregnant individuals’ ages and household incomes is illustrated in [@fig-income_age], and the relationship between age and education is depicted in [@fig-education_age]. Both graphs shows that a significant proportion of participants fall within the 27 to 34 age group, followed by those aged 35 to 39. Surprisingly, the number of participants under 27 is very low, almost comparable to those aged 40 and above. 
+
+Regarding household income in 2019, a large proportion of respondents reported incomes ranging from 70,000 to 149,999 as indicated in [@fig-income_age]. There is a notable presence of households with incomes exceeding 200,000 dollars, while very few households reported incomes below 40,000. For reference, the median after-tax income of Canadian households was 73,000 in 2020, and 11.1% of Canadians were in low-income group [@statcanIncomeCanada]. [@fig-education_age] demonstrates that the majority of pregnant individuals in the survey hold undergraduate degrees, with some having completed college/trade school or earned Master’s degrees. Very few respondents reported having less than a high school diploma. According to Statistics Canada, in 2021, 26.3% of women+ aged 15 and above hold high school diploma, 21.2% had college, CEGEP or other non-university certificate or diploma. 58.4% hold postsecondary certificate, while 5.9% completed Master’s Degree [@statcanHighestLevel]. 
 
 ```{r}
 #| message: false
@@ -94,7 +107,7 @@ clean_data |>
   labs(x = "Household Income in 2019", y = "Number of Observations", fill = "Age Group") 
 ```
 
-
+\newpage
 ```{r}
 #| message: false
 #| echo: false
@@ -109,7 +122,7 @@ clean_data |>
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   labs(x = "Individual's Education Level", y = "Number of Observations", fill = "Age Group")
 ```
-
+Next, [@fig-age_language_dep_anx] presents the proportions of participants experiencing less than moderate levels of depression/anxiety and those experiencing at least moderate depression/anxiety, categorized by age and language. From [@fig-age_language_dep_anx] (a) and (c), younger participants under 27 are more prone to feeling depressed and anxious, with the difference in depression being more noticeable. [@fig-age_language_dep_anx] (b) and (d), reveal that participants who completed the survey in French have lower levels of distress. Given that French speakers are concentrated in Quebec, which was actually one of the provinces most affected by the pandemic in 2020 [@COVID19Tracker], I consider the language, potentially indicating region of residence, is a factor influencing the probability of significant distress among pregnant individuals during the Covid-19 pandemic
 ```{r}
 #| label: fig-age_language_dep_anx
 #| fig-cap: Levels of Depression and Anxiety Among Pregnant Individuals Grouped By Age and Language
@@ -155,6 +168,7 @@ clean_data |>
   guides(fill = guide_legend(position = "bottom"))
 ```
 
+[@fig-income_education_dep_anx] displays the proportions of participants with less than moderate levels of depression/anxiety and those with at least moderate depression/anxiety, categorized by household income in 2019 and education. This contrast is particularly clear in [@fig-income_education_dep_anx] (a) and (b), which visualize the level of depression. More details can be found in @sec-appendix-average.
 ```{r}
 #| label: fig-income_education_dep_anx
 #| fig-cap: Levels of Depression and Anxiety Among Pregnant Individuals Grouped By Household Income and Education
@@ -199,7 +213,18 @@ clean_data |>
   labs(fill = "Anxiety", x = "Level of Education", y = "Proportion")+
   guides(fill = guide_legend(position = "bottom"))
 ```
+\newpage
+Three questions specific to fears of COVID-19 were asked in the survey. Answers were on a continuous scale from 0 (“not at all”) to 100 (“very much so”), with 50 representing “somewhat” [@nihPrenatalMental].
 
+1. How much do you think your life is in danger during the COVID-19 pandemic?
+2. How much do you think your unborn baby’s life is in danger during the COVID-19 pandemic?
+3. How much are you worried that exposure to the COVID-19 virus will harm your unborn baby?
+
+Given the similarity between questions 1 and 2, which respectively focus on self-perceived danger and danger perceived towards the unborn, I will analyze the responses to these questions, but the relationship between question 2 and 3 concerning the baby will be presented in @sec-appendix-questions. Scores are divided by 100, resulting in a range from 0 to 1. The relationship between the perceived level of danger, both towards self and the unborn, and prenatal mental health is visualized in [@fig-danger].
+
+[@fig-danger] (a) and (b) reveals that compared to perceived level of the unborn baby, a higher perceived level of danger to oneself tends to lend to a higher level of depression. From [@fig-danger] (c) and (d), it appears that the perceived level of danger to both oneself and the unborn baby seem to have similar impacts on the mental health of pregnant individuals. Again, the average level of distress among French speakers is lower than that among English speakers, but participants who speak French have a higher variation. 
+
+Therefore, the predictors I choose to estimate the prenatal mental health are maternal age groups, household income, education, the perceived danger to oneself, and the perceived danger to the unborn baby.
 ```{r}
 #| label: fig-danger
 #| fig-cap: Relationship between Perceived Level of Danger and Prenatal Mental Health
@@ -239,7 +264,7 @@ clean_data |>
   geom_text(aes(x = 1, y = 0.4, label = "0.4"), color = "black", vjust = -0.5, hjust = 1) +
   labs(x="Perceived Danger to Unborn Baby's Life", y = "Level of Prenatal Anxiety") + ylim(0,1) 
 ```
-
+\newpage
 # Model {#sec-model}
 ```{r}
 #| include: false
@@ -250,8 +275,39 @@ depression_model <- readRDS(file = here::here("model/depression.rds"))
 #| include: false
 anxiety_model <- readRDS(file = here::here("model/anxiety.rds"))
 ```
+## Model Set-up
+To estimate whether pregnant individuals will experience depression or anxiety beyond moderate levels, I will utilize logistic regression to create separate models for each psychological distress, using the `stan_glm()` function from the `rstanarm` package [@rrstanarm]. The predictors are age group, education, household income, language, the perceived level of danger to oneself, and the perceived level of danger to the unborn baby. It is important to recognize that a model is not, and cannot be, a true representation of reality [@tellingstorieswithdata]. The purpose of a model is to identify patterns in the data and make estimations, so models are not guaranteed to be 100% accurate. 
+
+Logistic regression is well-suited when the outcome variable is binary. For these two models, the outcome variables `depression` and `anxiety` are assigned to 1 if participants exhibit at least moderate symptoms and 0 otherwise. The logistic regression equation for both models can be expressed as follows:
+$$
+\begin{aligned}
+y_i|\pi_i & \sim \mbox{Bern}(\pi_i) \\
+\mbox{logit}(\pi_i) &= \beta_0+ \beta_1 \times \mbox{Age}_i + \beta_2 \times \mbox{Education}_i  + \beta_3 \times \mbox{HouseholdIncome}_i + \beta_4 \times \mbox{Language}_i \\
+&+ \beta_5 \times \mbox{DangerToSelf}_i + \beta_6 \times \mbox{DangerToBaby}_i\\
+\beta_0 & \sim \mbox{Normal}(0, 2.5)\\
+\beta_1 & \sim \mbox{Normal}(0, 2.5)\\
+\beta_2 & \sim \mbox{Normal}(0, 2.5)\\
+\beta_3 & \sim \mbox{Normal}(0, 2.5)\\
+\beta_4 & \sim \mbox{Normal}(0, 2.5)\\
+\beta_5 & \sim \mbox{Normal}(0, 2.5)\\
+\beta_6 & \sim \mbox{Normal}(0, 2.5)
+\end{aligned}
+$$
+
+where:
+
+- $y_i$ is the dependent variable, representing the probability of experiencing at least moderate prenatal depression or anxiety
+-  $\beta_0$ is the intercept term, representing the value if all the predictors are zero. It has a prior distribution that is normal with a mean of 0 and a standard deviation of 2.5
+- $\beta_1$, $\beta_2$, $\beta_3$, $\beta_4$, $\beta_5$, $\beta_6$ are the coefficients corresponding to the predictor variables, each with a prior distribution that is normal with mean 0 and standard deviation 2.5
+
+## Model Justification
+For the depression model, I expect to see a positive relationship between experiencing at least moderate depression and age under 27, low levels of education (e.g. less than high school diploma), low income household in 2019 (e.g. less than 20,000), and preference of using English. This expectation is based on @sec-data. Moreover, at the onset of the pandemic, when everything was uncertain, it is reasonable to that participants with lower income would worry more about the pregnancy, because financial strain can contribute to limited access to resources such as healthcare. Younger individuals or those with lower levels of education may experience increased depression due to limited life experience or reduced access to information. Pregnant individuals who perceive a higher level of threat to themselves or their unborn baby may also experience heightened stress levels.
+
+For the anxiety model, I also expect a positive relationship between experiencing at least moderate depression and age under 27, low levels of education and income, a preference of speaking English, and high perception of danger to both self and unborn baby. This is based on @sec-data as well. 
 
 # Results {#sec-results}
+## Depression
+The coefficients from the logistic regression model, presented in [@tbl-depression_model], reveal the impact of various predictors on whether a pregnant individual would experience at least moderate depression. Age groups 27 to 34, 35 to 39, and 40 and above all exhibit negative coefficients, suggesting a lower likelihood of depression in individuals aged 27 and above. The general trend in income is that a higher household income positively correlates with a lower probability of depression, but the highest income category, 200,000 and above, shows a slightly higher coefficient than the second higher income range of 175,000 to 199,999. Similarly, higher levels of education are associated with lower depression levels, with the highest level, the Doctoral Degree holders, having slightly larger coefficients than those with  the second highest degree, the Master’s degrees. Individuals who use French have a negative coefficient, implying a smaller likelihood of depression. The perceived threats to oneself and the unborn baby exhibit large positive coefficients, and the threat to life has a larger coefficient than the threat to the baby.
 ```{r}
 #| message: false
 #| echo: false
@@ -262,7 +318,9 @@ modelsummary(
   list(
     "Depression" = depression_model))
 ```
+A participant with Master’s Degree, a household income of 175,000 to 199,999, aged 27 to 34, who speaks French, and reports a low perceived threat is least likely to feel depressed. Conversely, a participant with less than a high school diploma, a household income between 20,000 to 39,999, aged under 27, who speaks English, and reports a high perception of danger is the most likely to experience depression.
 
+To provide intuitive insights into the model, I visualize the coefficients from [@tbl-depression_model] in [@fig-depression_interval] along with their 95% confident intervals. The age variables, the language, and threats variables have small confidence intervals. The intercept and the education variables display relatively large confidence intervals, suggesting lower precision in these estimates.
 ```{r}
 #| message: false
 #| echo: false
@@ -273,7 +331,10 @@ modelplot(depression_model, conf_level = 0.95, color = 'royalblue3') +
   labs(x = "Depression and 95% Confidence Interval")
 ```
 
+## Anxiety
+The coefficients from the logistic regression model for anxiety, presented in Table [@tbl-anxiety_model], shows the influence of predictor variables on whether a pregnant individual would experience at least moderate anxiety. Age groups 27 to 34, 35 to 39, and 40 and above have negative coefficients from [@tbl-anxiety_model], indicating a reduced likelihood of anxiety in people aged 27 and above, particularly in the 35 to 39 age group. Higher household income is associated with a lower probability of anxiety, with the income range of 175,000 to 199,999 showing the lowest coefficient. While higher levels of education correspond to lower anxiety levels, the differences are less evident compared to the depression model. To be more specific, the highest degree Doctoral Degree has coefficient -0.695, which is between the coefficients of College/trade school and Undergraduate degree, with coefficients -0.642 and -0.705 respectively. Pregnant individuals that speak French has a negative coefficient which implies a lower likelihood of anxiety as well. The perceived threat to oneself and the unborn baby exhibit large positive coefficients and are larger than the coefficients in the depression model. The two values are similar, 1.505 and 1.555, respectively.
 
+A participant with Master’s Degree, a household income of 175,000 to 199,999, aged 35 to 39, who speaks French, and reports a low perceived threat is least likely to experience anxiety. Conversely, a participant with less than a high school diploma, a household income below 20,000, aged under 27, who speaks English, and reports a high perception of danger is the most likely to feel anxious.
 ```{r}
 #| message: false
 #| echo: false
@@ -285,7 +346,7 @@ modelsummary(
     "Anxiety" = anxiety_model))
 ```
 
-
+[@fig-anxiety_interval] visualizes the coefficients and 95% confidence intervals from [@tbl-anxiety_model]. As with the depression model, the intercept and education variables display larger confidence intervals,  indicating lower precision in these estimates.
 ```{r}
 #| message: false
 #| echo: false
@@ -295,8 +356,21 @@ modelsummary(
 modelplot(anxiety_model, conf_level = 0.95, color = 'indianred3') +
   labs(x = "Anxiety and 95% Confidence Interval")
 ```
+# Discussion {#sec-discussion}
+## Depression and Anxiety
+As shown in @sec-results, lower household income is associated with higher levels of depression and anxiety, as financial strain can significantly impact individuals’ access to essential resources, including healthcare, particularly during uncertain times. Low education has been linked to a lack of a sense of control and resilience, and exposure to day-to-day stressors [@newsmedicalDoesEducation]. These negative factors have been strongly correlated with the onset of depression and anxiety [@keytopics]. In contrast, education is shown to be a clear indicators of life outcomes such as employment, income, and social status, and hence, a highly-educated participant is prone to having fewer symptoms [@keytopics]. 
 
-# Discussions {#sec-discussions}
+It is observed that pregnant individuals under 27 are more likely to experience depression and anxiety. This could be attributed to the fact that younger mothers have a higher likelihood of experiencing their first pregnancy compared to older mothers, and older mothers have a greater chance of having previously given birth. Young individuals often face various socioeconomic challenges, including lower income and limited time to complete their education, which can lead to lower educational attainment levels. These factors can contribute to a higher likelihood of experiencing depression and anxiety. 
+
+When individuals perceive a threat, their bodies activate the stress response system, which is an activation of stress hormones that produce physiological changes [@nihPhysiologyStress].  More than this, individuals who perceive threats may engage in rumination and a decreased sense of control, continuously dwelling on their fears and anxieties. Thus, a high perception of threat to oneself and baby may lead to physiological disorders.
+
+The differences in language preference is often related to the regions. Most people who prefer to speak French reside in Quebec. As Quebec being one of the provinces with the highest number of COVID-19 cases in 2020 [@COVID19Tracker], the reason behind French speakers having low level of depression and anxiety remains uncertain. It could potentially be attributed to lifestyle and cultural attitudes prevalent among Quebecers. Further research is needed to better understand the underlying factors.
+
+## Medical Treatment
+Only one-third of pregnant women with depression would consider taking anti-depression treatment [@NOWWUADCWWWD]. Hence, it is critical to raise awareness of depression as a health issue and encourage individuals to seek professional help. Research has shown that pregnant individuals with untreated depression face significantly increased infant risks compared to those without depression, particularly in terms of preterm birth and small infant size. However, treating depression with antidepressants has also been  found associated with high risks of preterm birth and low birth weight [@NOWWUADCWWWD]. In terms of these findings, non-pharmacological therapies may be more acceptable for pregnant individuals, even though conclusive evidence supporting these therapies is currently lacking [@NOWWUADCWWWD].
+
+## Birth Weight/Length Related to Prenatal Mental Health
+Study has showed that maternal distress may contribute to reduced birthweight, and complications related to preterm birth and low birth weight are leading causes of infant morbidity and mortality [@NOWWUADCWWWD]. The dataset used in this paper, from [@osfPregnancyDuring], also demonstrate a reduced birth weight and birth length related to  poor mental health. As illustrated in [@fig-weight_length_delivery], there is a clear association between higher levels of depression or anxiety and lower birthweight and length, categorized by delivery mode, with Caesarean-section babies having a larger average length and weight compared to vaginally delivered babies. These findings, again, emphasize the importance of addressing maternal mental health during pregnancy to support fetal growth and development.
 ```{r}
 #| label: fig-weight_length_delivery
 #| fig-cap: Distribution of Birth Weight and Length and Prenatal Mental Health by Delivery Mode
@@ -327,8 +401,24 @@ clean_data |>
   theme_minimal() +
   labs(x = "The Level of Prenatal Anxiety", y = "Birth Length (centimeters)")
 ```
+## Bias, Weakness, and Limitation
+Participants in the study were pregnant individuals aged 17 years or older, with gestation periods of up to 35 weeks. However, during the COVID-19 outbreak, potential biases of the data may occur, such as stress among young mothers under 17 years old and participants with more than 35 weeks of gestation, potentially leading to more severe depression or anxiety. This sampling bias could result in an underestimation of mental distress levels among pregnant individuals. As demonstrated in @sec-results, younger mothers tend to experience higher levels of depression and anxiety, and they are less likely to be financially stable compared to adults. It is important to understand the mental health of mothers under 17 years old, which helps .
+
+In the survey, depression and anxiety levels were assessed through self-reported measures using the Edinburgh Postnatal Depression Scale and Promis Anxiety Scale, while birth length and weight were reported by parents. This reliance on self-reporting and parental reporting introduces biases and potential ethical implications that may limit the accuracy of data.
+
+One weakness of the dataset is its lack of information on other mental disorders besides depression and anxiety, like psychosis, and geographical data. Considering that regions with different population densities may experience varying levels of panic during the pandemic, the analysis could benefit from including relevant regional data for a better precision. Moreover, some surveys were collected through social media like Facebook and Instagram Ads. These platforms may not be perceived as formal or serious compared to surveys conducted by established survey companies, meaning that respondents may not have provided accurate or complete information, potentially affecting the reliability and validity of the data collected.
+
+While several rounds of surveys were conducted, the complete dataset containing additional information was not publicly accessible. Consequently, this paper only utilized one survey and could not analyze changes in mental distress over time or assess newborn health outcomes, representing a limitation of the study.
+
+## Next step
+Given the challenges posed by the COVID-19 pandemic and the escalation of conflicts and crises worldwide, understanding prenatal mental health amidst such objective hardships is useful and necessary. I recommend that researchers focus on investigating how distress during pregnancy impacts birth outcomes, including the health and developmental outcomes of newborns, as well as postnatal mental health. Future research can explore deeper into the subjective factors, such as the prolonged duration of staying at home and the attitudes of family members, in order to comprehensively assess their impacts on maternal well-being. 
+
+The models generated from this analysis serve as a foundation for advancing discussions on resource allocation, clinical interventions and the role of familial support in aiding pregnant individuals. By identifying the multifaceted factors influencing maternal well-being and mental health outcomes, policymakers and healthcare providers can make informed decisions regarding resources allocation and targeted treatments to provide support for pregnant individuals through hardships. 
+
 \newpage
 # Appendix {#sec-appendix}
+## Depression and Anxiety by Education and Income {#sec-appendix-average}
+[@fig-average_depression_and_anxiety] illustrates the detailed distribution of levels of depression and anxiety by education and household income. Generally, participants with higher education levels and higher household income exhibit lower levels of depression and anxiety. Focusing on the lowest education and lowest income groups, individuals with less than high school diploma are more easily to experience anxiety, with an average score of 0.529, compared to 0.499 among those with household incomes less than 20,000. Conversely, individuals with household incomes less than 20,000 tend to feel depressed, with an average score of 0.423, compared to 0.407 among those with less than a high school diploma.
 ```{r}
 #| label: fig-average_depression_and_anxiety
 #| fig-cap: Distribution of Levels of Depression and Anxiety by Education and Household Income
@@ -370,7 +460,8 @@ clean_data %>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) + ylim(0, 0.6) +
   labs(x="Household Income in 2019", y="Average Level of Anxiety")
 ```
-
+## Answers to Question 2 and 3 {#sec-appendix-questions}
+[@fig-danger_baby] displays the relationship between the answers to question 2 and question 3 in @sec-data.
 ```{r}
 #| message: false
 #| echo: false
@@ -382,5 +473,11 @@ clean_data |>
   geom_jitter(color='darkgray', alpha=0.4) +
   geom_smooth() + theme_minimal()
 ```
+\newpage
+## Data cleaning {#sec-appendix-cleaning}
+After obtaining the original raw dataset, I select the following variables: `maternal_age`, `household_income`, `edinburgh_postnatal_depression_scale`, `promis_anxiety`, `delivery_date_converted_to_month_and_year`, `birth_length`, `birth_weight`, `maternal_education`, `delivery_mode`, `language`, `threaten_life`, `threaten_baby_danger`, `threaten_baby_harm`. I exclude those observations with missing values and create two new variables, `month` and `year`, derived from `delivery_date_converted_to_month_and_year`, representing the delivery month and year respectively. Additionally, I categorized maternal age into four groups: under 27, 27 to 34, 35 to 39, and 40 and above, creating a variable called `age_group`. I then convert `edinburgh_postnatal_depression_scale` and `promis_anxiety` to percentages ranging from 0 to 1, named `EPDS` and `PROMIS` as specified in @sec-data. I scale `threaten_life`, `threaten_baby_danger` and `threaten_baby_harm` by dividing each by 100 to ensure they range from 0 to 1.
+
+Subsequently, I filtered the dataset to retain only observations from the year 2020, excluding those with a delivery month of April, considering that the surveys were conducted from May 2020 onwards. Finally, two variables named `depression` and `anxiety` are created based on the criteria stated in @sec-data: `depression` is set to 1 if `EPDS` is greater than or equal to 0.4, and 0 otherwise; similarly, `anxiety` is assigned to 1 if `PROMIS` is not less than 0.464, and 0 if it is smaller than 0.464.
+
 \newpage
 # References
