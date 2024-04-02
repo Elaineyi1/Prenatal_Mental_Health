@@ -232,3 +232,13 @@ In this modified code:
 We first generate a sample of integers from 17 to 49 (inclusive) with a sample size of 450 using sample(17:49, 450, replace = TRUE).
 Then, we create a sequence of decimal values from 49.1 to 50 with an increment of 0.1 using seq(49.1, 50, by = 0.1).
 Finally, we combine these two vectors using the c() function to create a single vector containing both integer and decimal values for maternal ages.
+User
+could you make this writing natural:  The estimand being explored is how does these predictors influence whether a pregnant individual, during the pandemic, would experience at least moderate level of depression or anxiety, which were self-reported using Edinburgh Postnatal Depression and Patient-Reported Outcomes Measurement Information System Scales in the survey. 
+
+ChatGPT
+The focus of investigation is on understanding how these predictors influence the likelihood of a pregnant individual experiencing at least moderate levels of depression or anxiety during the pandemic. These levels were self-reported using the Edinburgh Postnatal Depression Scale and the Patient-Reported Outcomes Measurement Information System Scales in the survey.
+User
+could you make it one sentence
+
+ChatGPT
+The study aims to ascertain how these predictors influence whether pregnant individuals, during the pandemic, would experience at least moderate levels of depression or anxiety, as self-reported using the Edinburgh Postnatal Depression Scale and the Patient-Reported Outcomes Measurement Information System Scales in the survey.
