@@ -406,6 +406,7 @@ clean_data |>
   theme_minimal() +
   labs(x = "The Level of Prenatal Anxiety", y = "Birth Length (centimeters)")
 ```
+
 ## Bias, Weakness, and Limitation
 Participants in the study were pregnant individuals aged 17 years or older, with gestation periods of up to 35 weeks. However, during the COVID-19 outbreak, potential biases of the data may occur, such as stress among young mothers under 17 years old and participants with more than 35 weeks of gestation, potentially leading to more severe depression or anxiety. This sampling bias could result in an underestimation of mental distress levels among pregnant individuals. As demonstrated in @sec-results, younger mothers tend to experience higher levels of depression and anxiety, and they are less likely to be financially stable compared to adults. It is important to understand the mental health of mothers under 17 years old, which helps .
 

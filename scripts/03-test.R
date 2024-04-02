@@ -21,18 +21,18 @@ min(clean_data$threaten_baby_danger) >= 0
 min(clean_data$threaten_baby_harm) >= 0
 
 # Groups and classes
-length(unique(clean_data$age_group)) <= 4
-length(unique(clean_data$household_income)) <= 9
-length(unique(clean_data$maternal_education)) <= 6
-is.numeric(clean_data$maternal_age)
-is.numeric(clean_data$birth_weight)
-is.numeric(clean_data$birth_length)
-is.numeric(clean_data$EPDS)
-is.numeric(clean_data$PROMIS)
+stopifnot(length(unique(clean_data$age_group)) <= 4,
+          length(unique(clean_data$household_income)) <= 9,
+          length(unique(clean_data$maternal_education)) <= 6,
+          is.numeric(clean_data$maternal_age),
+          is.numeric(clean_data$birth_weight),
+          is.numeric(clean_data$birth_length),
+          is.numeric(clean_data$EPDS),
+          is.numeric(clean_data$PROMIS))
 
-unique(clean_data$language) %in% c("English", "French")
-length(unique(clean_data$month)) <= 8
-length(unique(clean_data$delivery_mode)) == 2
+stopifnot(unique(clean_data$language) %in% c("English", "French"),
+          length(unique(clean_data$month)) <= 8,
+          length(unique(clean_data$delivery_mode)) == 2)
 
 class(clean_data$language) == "character"
 class(clean_data$delivery_mode) == "character"
