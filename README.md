@@ -2,7 +2,7 @@
 ## Overview
 This paper uses logistic regression to estimate whether a pregnant individual would experience at least moderate level of depression or anxiety at the beginning of the Covid-19 pandemic. The results show that the perceived threats to oneself and the unborn child are strongly correlated to the mental distress. Young pregnant individuals with lower levels of education and from lower-income families are more likely to experience depression.
 
-The dataset used in could be found at https://osf.io/ha5dp/. This raw dataset is uploaded to `inputs/data` and is added to .gitignore.
+The dataset used in this repo could be found at https://osf.io/ha5dp/. This raw dataset is uploaded to `inputs/data` and is added to .gitignore.
 
 ## File Structure
 The repo is structured as:

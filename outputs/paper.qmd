@@ -7,7 +7,7 @@ format:
     documentclass: article
     geometry: margin = 1in
     abstract: "The outbreak of the Covid-19 pandemic was a substantial stressor, especially for pregnant individuals. Since depression and anxiety beyond moderate levels are considered clinically significant, this paper uses Bayesian model and logistic regression to evaluate the probability of experiencing at least moderate levels of prenatal depression or anxiety during the pandemic. The analysis reveals that the perceived threats to oneself and the unborn child are strongly correlated to the mental distress, especially among younger pregnant individuals with lower levels of education and from lower-income families."
-date: "30 March 2024"
+date: "2 April 2024"
 date-format: "D MMMM YYYY"
 number-sections: true
 thanks: "Code and data in this analysis is available at: https://github.com/Elaineyi1/Prenatal_Mental_Health"
@@ -18,7 +18,9 @@ toc: true
 # Introduction {#sec-introduction}
 While pregnancy and childbirth are often moments of joy, they can also bring about distress as mothers navigate physical changes, uncertainties and responsibilities. In the 12 months before childbirth, 12.5% of women in Canada reported that most days were very stressful, while 7.5% of women reported depressive or anxious symptoms [@canadaPregnancyWomenaposs].  These figures are likely to increase during the COVID-19 pandemic due to the heightened uncertainty and panic. Maternal depression and anxiety during pregnancy are associated with adverse neurodevelopmental outcomes for the offspring, such as hyperactivity disorder, autism, poor cognitive or emotional developmental [@MPMHPbeta], and thus, prenatal mental health is crucial for both mothers and children. In light of this, I utilize data from the Open Science Framework [@osfPregnancyDuring] to explore factors contributing to maternal depression and anxiety during the pandemic, along with associated birth outcomes. This analysis could also shed light on mothers’ mental health during other objective hardships or the general effects of prenatal distress.
 
-Given that moderate depression and anxiety can impair daily functioning, this paper distinguishes between levels of distress and use logistic regression to estimate the likelihood of pregnant individuals experiencing at least moderate levels of depression and anxiety in Canada during the pandemic. Predictors include age, education, household income, language preference, and perceived threat to oneself and the unborn baby. The results indicate that young pregnant individuals with lower education and income, as well as a high perception of danger to both themselves and their unborn child, are more likely to experience at least moderate depression and anxiety. Furthermore, participants who completed the survey in French demonstrated a lower likelihood of getting distress compared to those who responded in English. While the dataset used in this paper provides valuable information on pregnant participants’ demographic information, basic birth outcomes, and mental health data, it does not include any information on newborns’ health. Consequently, this paper mainly focuses on the maternal well-being and its affects on mothers.
+Given that moderate depression and anxiety can impair daily functioning, this paper distinguishes between levels of distress and use logistic regression to estimate the likelihood of pregnant individuals experiencing at least moderate levels of depression and anxiety in Canada during the pandemic. Predictors include age, education, household income, language preference, and perceived threat to oneself and the unborn baby. The estimand being explored is whether pregnant individuals, during the pandemic, would experience at least moderate levels of depression or anxiety, as self-reported using the Edinburgh Postnatal Depression Scale and the Patient-Reported Outcomes Measurement Information System Scales in the survey. 
+
+The results indicate that young pregnant individuals with lower education and income, as well as a high perception of danger to both themselves and their unborn child, are more likely to experience at least moderate depression and anxiety. Furthermore, participants who completed the survey in French demonstrated a lower likelihood of getting distress compared to those who responded in English. While the dataset used in this paper provides valuable information on pregnant participants’ demographic information, basic birth outcomes, and mental health data, it does not include any information on newborns’ health. Consequently, this paper mainly focuses on the maternal well-being and its affects on mothers.
 
 This paper is constructed as follows: The data utilized for analysis is discussed in @sec-data. Following that, two models, one for depression and one for anxiety, is introduced in @sec-model. @sec-results then talks about the results derived from the models. Lastly, I will discuss the findings in a broader context and address limitations of this paper as well as the future explorations in @sec-discussion. This paper uses the programming language R [@r]. The analysis, the model and the visualizations use the following packages: `rstanarm` [@rrstanarm], `modelsummary` [@rmodelsummary], `ggplot2` [@rggplot2], `dplyr` [@rdplyr], `readr` [@rreadr], `janitor` [@rjanitor], `arrow` [@rarrow], `here` [@rhere], `broom` [@rbroom], and `knitr` [@rknitr].
 ```{r}
@@ -85,11 +87,8 @@ clean_data |>
   ggplot(aes(x = month, y = PROMIS)) +
   geom_boxplot() + ylim(0,1)
 ```
-[@fig-month] provides an overview of the levels of depression and anxiety spanning from May 2020 to December 2020. Overall, there is a decreasing trend observed in both scales with the occurrence of the pandemic. On average, the level of anxiety tends to be slightly higher than that of depression, with the majority experiencing depression levels below 0.5. However, depression exhibits more higher outliers, implying that some individuals experience significantly severe depression symptoms compared to the average. Mothers scoring above 12 or 13, which represents 40%, are likely to be suffering from depression and should seek medical attention [@EDPSstanford]. Hence, the distributions in [@fig-month] indicate a considerable number of pregnant individuals may be experiencing distress, given that the means fall within the range of 0.3 to 0.5.
-
-The mean age of mothers at the time of delivery in Canada is approximately 31 [@statcanMeanMother]. Since the dataset contains maternal ages ranging from 18.5 to 49, and 35 and above is categorized as advanced maternal age [@nihMaternalRisk], I have grouped the ages as follows: Under 27, 27 to 34, 35 to 39, and 40 and above. The distribution of pregnant individuals’ ages and household incomes is illustrated in [@fig-income_age], and the relationship between age and education is depicted in [@fig-education_age]. Both graphs shows that a significant proportion of participants fall within the 27 to 34 age group, followed by those aged 35 to 39. Surprisingly, the number of participants under 27 is very low, almost comparable to those aged 40 and above. 
-
-Regarding household income in 2019, a large proportion of respondents reported incomes ranging from 70,000 to 149,999 as indicated in [@fig-income_age]. There is a notable presence of households with incomes exceeding 200,000 dollars, while very few households reported incomes below 40,000. For reference, the median after-tax income of Canadian households was 73,000 in 2020, and 11.1% of Canadians were in low-income group [@statcanIncomeCanada]. [@fig-education_age] demonstrates that the majority of pregnant individuals in the survey hold undergraduate degrees, with some having completed college/trade school or earned Master’s degrees. Very few respondents reported having less than a high school diploma. According to Statistics Canada, in 2021, 26.3% of women+ aged 15 and above hold high school diploma, 21.2% had college, CEGEP or other non-university certificate or diploma. 58.4% hold postsecondary certificate, while 5.9% completed Master’s Degree [@statcanHighestLevel]. 
+\newpage
+Firstly, [@fig-month] provides an overview of the levels of depression and anxiety spanning from May 2020 to December 2020. Overall, there is a decreasing trend observed in both scales with the occurrence of the pandemic. On average, the level of anxiety tends to be slightly higher than that of depression, with the majority experiencing depression levels below 0.5. However, depression exhibits more higher outliers, implying that some individuals experience significantly severe depression symptoms compared to the average. Mothers scoring above 12 or 13, which represents 40%, are likely to be suffering from depression and should seek medical attention [@EDPSstanford]. Hence, the distributions in [@fig-month] indicate a considerable number of pregnant individuals may be experiencing distress, given that the means fall within the range of 0.3 to 0.5.
 
 ```{r}
 #| message: false
@@ -107,7 +106,6 @@ clean_data |>
   labs(x = "Household Income in 2019", y = "Number of Observations", fill = "Age Group") 
 ```
 
-\newpage
 ```{r}
 #| message: false
 #| echo: false
@@ -122,10 +120,15 @@ clean_data |>
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   labs(x = "Individual's Education Level", y = "Number of Observations", fill = "Age Group")
 ```
-Next, [@fig-age_language_dep_anx] presents the proportions of participants experiencing less than moderate levels of depression/anxiety and those experiencing at least moderate depression/anxiety, categorized by age and language. From [@fig-age_language_dep_anx] (a) and (c), younger participants under 27 are more prone to feeling depressed and anxious, with the difference in depression being more noticeable. [@fig-age_language_dep_anx] (b) and (d), reveal that participants who completed the survey in French have lower levels of distress. Given that French speakers are concentrated in Quebec, which was actually one of the provinces most affected by the pandemic in 2020 [@COVID19Tracker], I consider the language, potentially indicating region of residence, is a factor influencing the probability of significant distress among pregnant individuals during the Covid-19 pandemic
+The mean age of mothers at the time of delivery in Canada is approximately 31 [@statcanMeanMother]. Since the dataset contains maternal ages ranging from 18.5 to 49, and 35 and above is categorized as advanced maternal age [@nihMaternalRisk], I have grouped the ages as follows: Under 27, 27 to 34, 35 to 39, and 40 and above. The distribution of pregnant individuals’ ages and household incomes is illustrated in [@fig-income_age], and the relationship between age and education is depicted in [@fig-education_age]. Both graphs shows that a significant proportion of participants fall within the 27 to 34 age group, followed by those aged 35 to 39. Surprisingly, the number of participants under 27 is very low, almost comparable to those aged 40 and above. 
+
+Regarding household income in 2019, a large proportion of respondents reported incomes ranging from 70,000 to 149,999 as indicated in [@fig-income_age]. There is a notable presence of households with incomes exceeding 200,000 dollars, while very few households reported incomes below 40,000. For reference, the median after-tax income of Canadian households was 73,000 in 2020, and 11.1% of Canadians were in low-income group [@statcanIncomeCanada]. [@fig-education_age] demonstrates that the majority of pregnant individuals in the survey hold undergraduate degrees, with some having completed college/trade school or earned Master’s degrees. Very few respondents reported having less than a high school diploma. According to Statistics Canada, in 2021, 26.3% of women+ aged 15 and above hold high school diploma, 21.2% had college, CEGEP or other non-university certificate or diploma. 58.4% hold postsecondary certificate, while 5.9% completed Master’s Degree [@statcanHighestLevel].
+
+\newpage
+Regarding age and language, [@fig-age_language_dep_anx] presents the proportions of participants experiencing less than moderate levels of depression/anxiety and those experiencing at least moderate depression/anxiety, categorized by age and language. From [@fig-age_language_dep_anx] (a) and (c), younger participants under 27 are more prone to feeling depressed and anxious, with the difference in depression being more noticeable. [@fig-age_language_dep_anx] (b) and (d), reveal that participants who completed the survey in French have lower levels of distress. Given that French speakers are concentrated in Quebec, which was actually one of the provinces most affected by the pandemic in 2020 [@COVID19Tracker], I consider the language, potentially indicating region of residence, is a factor influencing the probability of significant distress among pregnant individuals during the Covid-19 pandemic
 ```{r}
 #| label: fig-age_language_dep_anx
-#| fig-cap: Levels of Depression and Anxiety Among Pregnant Individuals Grouped By Age and Language
+#| fig-cap: Levels of Depression and Anxiety Among Pregnant Individuals Grouped By Age and Language Used to Complete the Survey
 #| echo: false
 #| warning: false
 #| message: false
@@ -135,7 +138,7 @@ clean_data |>
   ggplot(aes(x=age_group,fill = factor(depression))) +
   geom_bar(position = "fill") +
   scale_fill_manual(values = c("0" = "lightcyan3", "1" = "cadetblue"), 
-                    labels = c("No or Mild Depression", "Moderate Depression or more"))+
+                    labels = c("None or \nMild Depression", "Moderate Depression \nor Higher"))+
   coord_flip()+
   labs(fill = "Depression", x = "Age Group", y = "Proportion") +
   guides(fill = guide_legend(position = "bottom"))
@@ -144,7 +147,7 @@ clean_data |>
   ggplot(aes(x = language, fill = factor(depression))) +
   geom_bar(position = "fill") +
   scale_fill_manual(values = c("0" = "lightcyan3", "1" = "cadetblue"), 
-                    labels = c("No or Mild Depression", "Moderate Depression or more")) +
+                    labels = c("None or \nMild Depression", "Moderate Depression \nor Higher")) +
   coord_flip() +
   labs(fill = "Depression", x = "Language of the Survey", y = "Proportion") +
   guides(fill = guide_legend(position = "bottom"))
@@ -153,7 +156,7 @@ clean_data |>
   ggplot(aes(x = age_group, fill = factor(anxiety))) +
   geom_bar(position = "fill") +
   scale_fill_manual(values = c("0" = "#f4bfb6", "1" = "#f09286"), 
-                    labels = c("No or Mild Anxiety", "Moderately Anxiety or more")) +
+                    labels = c("None or \nMild Anxiety", "Moderate Anxiety \nor Higher")) +
   coord_flip() +
   labs(fill = "Anxiety", x = "Age Group", y = "Proportion")+
   guides(fill = guide_legend(position = "bottom"))
@@ -162,7 +165,7 @@ clean_data |>
   ggplot(aes(x = language, fill = factor(anxiety))) +
   geom_bar(position = "fill") +
   scale_fill_manual(values = c("0" = "#f4bfb6", "1" = "#f09286"), 
-                    labels = c("No or Mild Anxiety", "Moderate Anxiety or more")) +
+                    labels = c("None or \nMild Anxiety", "Moderate Anxiety \nor Higher")) +
   coord_flip() +
   labs(fill = "Anxiety", x = "Language of the Survey", y = "Proportion") +
   guides(fill = guide_legend(position = "bottom"))
@@ -181,7 +184,7 @@ clean_data |>
   ggplot(aes(x=household_income,fill = factor(depression))) +
   geom_bar(position = "fill") +
   scale_fill_manual(values = c("0" = "lightcyan3", "1" = "cadetblue"), 
-                    labels = c("No or Mild Depression", "Moderate Depression or more"))+
+                    labels = c("None or \nMild Depression", "Moderate Depression \nor Higher"))+
   coord_flip()+
   labs(fill = "Depression", x = "Household Income in 2019", y = "Proportion") + 
   guides(fill = guide_legend(position = "bottom"))
@@ -190,7 +193,7 @@ clean_data |>
   ggplot(aes(x = maternal_education, fill = factor(depression))) +
   geom_bar(position = "fill") +
   scale_fill_manual(values = c("0" = "lightcyan3", "1" = "cadetblue"), 
-                    labels = c("No or Mild Depression", "Moderate Depression or more")) +
+                    labels = c("None or \nMild Depression", "Moderate Depression \nor Higher")) +
   coord_flip() +
   labs(fill = "Depression", x = "Level of Education", y = "Proportion")+
   guides(fill = guide_legend(position = "bottom"))
@@ -199,7 +202,7 @@ clean_data |>
   ggplot(aes(x = household_income, fill = factor(anxiety))) +
   geom_bar(position = "fill") +
   scale_fill_manual(values = c("0" = "#f4bfb6", "1" = "#f09286"), 
-                    labels = c("No or Mild Anxiety", "Moderately Anxiety or more")) +
+                    labels = c("None or \nMild Anxiety", "Moderate Anxiety \nor Higher")) +
   coord_flip() +
   labs(fill = "Anxiety", x = "Household Income in 2019", y = "Proportion")+
   guides(fill = guide_legend(position = "bottom"))
@@ -208,7 +211,7 @@ clean_data |>
   ggplot(aes(x = maternal_education, fill = factor(anxiety))) +
   geom_bar(position = "fill") +
   scale_fill_manual(values = c("0" = "#f4bfb6", "1" = "#f09286"), 
-                    labels = c("No or Mild Anxiety", "Moderate Anxiety or more")) +
+                    labels = c("None or \nMild Anxiety", "Moderate Anxiety \nor Higher")) +
   coord_flip() +
   labs(fill = "Anxiety", x = "Level of Education", y = "Proportion")+
   guides(fill = guide_legend(position = "bottom"))
