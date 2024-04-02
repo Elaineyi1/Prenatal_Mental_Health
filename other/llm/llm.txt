@@ -242,3 +242,8 @@ could you make it one sentence
 
 ChatGPT
 The study aims to ascertain how these predictors influence whether pregnant individuals, during the pandemic, would experience at least moderate levels of depression or anxiety, as self-reported using the Edinburgh Postnatal Depression Scale and the Patient-Reported Outcomes Measurement Information System Scales in the survey.
+
+Improve my writing: I recommend that researchers focus on investigating how distress during pregnancy impacts birth outcomes, including the health outcomes and the newborns' language development during the long time staying at home
+
+ChatGPT
+I suggest that researchers prioritize investigating the impact of distress during pregnancy on birth outcomes, encompassing both the health outcomes and the language development of newborns, particularly during extended periods of staying at home.
