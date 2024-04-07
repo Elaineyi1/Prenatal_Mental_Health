@@ -16,4 +16,4 @@ The repo is structured as:
 The codes used to install packages are in `scripts/01-download.R`, with `#` before each code.
 
 ## LLM Usage
-ChatGpt was used for correcting grammar and modifying codes. The chat can be found in `other/llm/llm.txt`. No other LLM was used.
+ChatGpt was used for correcting grammar and modifying codes. The chats can be found in `other/llm/llm.txt`. No other LLM was used.
