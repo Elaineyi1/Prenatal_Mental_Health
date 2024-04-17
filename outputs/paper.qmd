@@ -6,8 +6,8 @@ format:
   pdf:
     documentclass: article
     geometry: margin = 1in
-    abstract: "The outbreak of the Covid-19 pandemic was a substantial stressor, especially for pregnant individuals. Since depression and anxiety beyond moderate levels are considered clinically significant, this paper uses the Bayesian model and logistic regression to evaluate the probability of experiencing at least moderate levels of prenatal depression or anxiety during the pandemic. The analysis indicates that younger age, low levels of education and household income, and a high perception of danger to both oneself and the unborn are associated with higher levels of depression and anxiety."
-date: "8 April 2024"
+    abstract: "The outbreak of the Covid-19 pandemic was a substantial stressor, especially for pregnant individuals. Since depression and anxiety beyond moderate levels are considered clinically significant, this paper uses logistic regression to evaluate the probability of experiencing at least moderate levels of prenatal depression or anxiety in Canada during the pandemic. The analysis indicates that younger age, low levels of education and household income, and a high perception of danger to both oneself and the unborn are associated with higher levels of depression and anxiety."
+date: "17 April 2024"
 date-format: "D MMMM YYYY"
 number-sections: true
 thanks: "Code and data in this analysis is available at: https://github.com/Elaineyi1/Prenatal_Mental_Health"
@@ -77,7 +77,7 @@ clean_data$month <- factor(clean_data$month, levels = month_levels)
 
 ```{r}
 #| label: fig-month
-#| fig-cap: Distribution of Levels of Depression and Anxiety by Month
+#| fig-cap: The Distribution of Levels of Depression and Anxiety by Month
 #| echo: false
 #| warning: false
 #| message: false
@@ -126,7 +126,7 @@ clean_data |>
 
 In Canada, the mean age of mothers at delivery is approximately 31 [@statcanMeanMother]. The dataset contains maternal ages ranging from 18.5 to 49, and because 35 and above is categorized as advanced maternal age [@nihMaternalRisk], I have grouped the ages as follows: Under 27, 27 to 34, 35 to 39, and 40 and above. The distribution of pregnant individuals’ ages and household incomes is illustrated in [@fig-income_age], and the relationship between age and education is depicted in [@fig-education_age]. Both graphs show that a significant proportion of participants fall within the 27 to 34 age group, followed by those aged 35 to 39. Surprisingly, the number of participants under 27 is very low, almost comparable to those aged 40 and above. 
 
-A significant proportion of respondents reported incomes ranging from 70,000 to 149,999, as indicated in [@fig-income_age]. There is a notable presence of households with incomes exceeding 200,000, while very few reported incomes below 40,000. For reference, the median after-tax income of Canadian households was 73,000 in 2020, and 11.1% of Canadians were in the low-income group [@statcanIncomeCanada]. [@fig-education_age] demonstrates that the majority of pregnant individuals in the survey hold undergraduate degrees, with some having completed college/trade school or earned Master’s degrees. Very few respondents reported having less than a high school diploma. According to Statistics Canada, in 2021, 26.3% of women+ aged 15 and above held a high school diploma, 21.2% had a college, CEGEP, or other non-university certificate or diploma. 58.4% held a postsecondary certificate, while 5.9% completed a Master’s Degree [@statcanHighestLevel].
+A significant proportion of respondents reported incomes ranging from 70,000 to 149,999, as indicated in [@fig-income_age]. There is a notable presence of households with incomes exceeding 200,000, while very few reported incomes below 40,000. For reference, the median after-tax income of Canadian households was 73,000 in 2020, and 11.1% of Canadians were in the low-income group [@statcanIncomeCanada]. [@fig-education_age] demonstrates that the majority of pregnant individuals in the survey hold undergraduate degrees, with some having completed college/trade school or earned Master’s degrees. Very few respondents reported having less than a high school diploma. According to Statistics Canada, in 2021, 26.3% of women+ aged 15 and above held a high school diploma, 21.2% had a college, CEGEP, or other non-university certificate or diploma. 58.4% held a postsecondary certificate, while 5.9% completed a Master’s Degree [@statcanHighestLevel]. The participants have a relatively higher income and education distribution than average.
 \newpage
 Regarding age and language, [@fig-age_language_dep_anx] presents the proportions of participants experiencing less than moderate levels of depression/anxiety and those experiencing at least moderate depression/anxiety, categorized by age and language. Darker colours represent a more severe level of depression or anxiety. From [@fig-age_language_dep_anx] (a) and (c), younger participants under 27 are more prone to feeling depressed and anxious, with the difference in depression being more noticeable. [@fig-age_language_dep_anx] (b) and (d) reveal that participants who completed the survey in French have lower levels of distress. Given that French speakers are concentrated in Quebec, which was one of the provinces most affected by the pandemic in 2020 [@COVID19Tracker], I consider the language, potentially indicating the region of residence, as a factor influencing the probability of significant distress among pregnant individuals during the Covid-19 pandemic.
 ```{r}
