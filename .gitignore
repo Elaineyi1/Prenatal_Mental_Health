@@ -47,6 +47,3 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
-
-# Ignore the raw dataset
-inputs/data/OSFData_Upload_2023_Mar30.csv
