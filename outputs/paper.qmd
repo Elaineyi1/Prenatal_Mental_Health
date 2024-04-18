@@ -323,7 +323,7 @@ The coefficients from the logistic regression model, presented in [@tbl-depressi
 #| echo: false
 #| warning: false
 #| label: tbl-depression_model
-#| tbl-cap: Estimating Prenatal Depression given Age, Household Income, Education Level and Choice of Language
+#| tbl-cap: Estimating Prenatal Depression given Age, Household Income, Education Level, Perception of Threats, and Choice of Language
 modelsummary(
   list(
     "Depression" = depression_model))
@@ -351,7 +351,7 @@ The coefficients from the logistic regression model for anxiety, presented in [@
 #| echo: false
 #| warning: false
 #| label: tbl-anxiety_model
-#| tbl-cap: Estimating Prenatal Anxiety given Age Group, Household Income, Education Level and Choice of Language.
+#| tbl-cap: Estimating Prenatal Anxiety given Age Group, Household Income, Education Level, Perception of Treats, and Choice of Language
 modelsummary(
   list(
     "Anxiety" = anxiety_model))

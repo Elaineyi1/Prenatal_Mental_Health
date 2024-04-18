@@ -7,6 +7,7 @@ clean_data <- read_csv(
   show_col_types = FALSE
 )
 
+
 # Maximum and minimum of scores
 max(clean_data$PROMIS) <= 1
 max(clean_data$EPDS) <= 1
@@ -19,6 +20,7 @@ min(clean_data$EPDS) >= 0
 min(clean_data$threaten_life) >= 0
 min(clean_data$threaten_baby_danger) >= 0
 min(clean_data$threaten_baby_harm) >= 0
+
 
 # Groups and classes
 stopifnot(length(unique(clean_data$age_group)) <= 4,

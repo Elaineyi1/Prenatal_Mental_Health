@@ -28,6 +28,7 @@ simulated_data <- simulated_data |> mutate("EPDS" = Edinburgh_Postnatal_Depressi
                          "PROMIS" = (PROMIS_scale-7)/28)
 
 
+
 # Tests
 max(simulated_data$PROMIS) <= 1
 max(simulated_data$EPDS) <= 1
