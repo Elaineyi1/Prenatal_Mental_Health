@@ -1,3 +1,9 @@
+#### Preamble ####
+# Purpose: Test the data
+# Author: Boxuan Yi
+# Email: boxuan.yi@mail.utoronto.ca
+# Date: 24 March 2024
+# Prerequisites: None
 library(arrow)
 library(readr)
 library(here)
